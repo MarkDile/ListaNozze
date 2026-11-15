@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista invitati nozze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: una colonna da telefono, riepilogo in alto, tre viste (Guida, Lista, Inviti) con barra in basso. */
+:root{
+  --bg:#FCFDFB; --surface:#FFFFFF; --ink:#26332B; --muted:#66746B; --line:#E7ECE3;
+  --accent:#5B8A3C; --accent-ink:#FFFFFF; --accent-soft:#F0F6E9;
+  --marco:#2B6C7C; --miriam:#A3426A; --both:#7A6A2E;
+  --ok:#2F7D4F; --warn:#B36B00; --no:#B23A3A;
+  --display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 96px;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-size:26px;line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-size:19px;margin:0;text-wrap:balance}
+.sync{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
+.sync.on i{background:var(--ok)}
+.sync.off i{background:var(--no)}
+.banner{background:var(--accent-soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.banner.err{border-color:var(--no)}
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.sum-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.big{font-family:var(--display);font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-family:var(--body);font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}
+.target input::-webkit-outer-spin-button,.target input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.target{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.target input{width:92px;min-height:40px;font-size:16px;-moz-appearance:textfield;appearance:textfield;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);text-align:right;font-variant-numeric:tabular-nums}
+.split{display:flex;height:10px;border-radius:6px;overflow:hidden;background:var(--line)}
+.split span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.legend b{color:var(--ink);font-weight:600}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;font-weight:600;min-height:44px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--no)}
+.btn.small{min-height:36px;padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.55;cursor:default}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.step-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.step-n{font-family:var(--display);color:var(--accent);font-size:15px}
+.step p{margin:0;color:var(--muted);font-size:14.5px}
+.counts{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:2px 9px;font-size:12.5px;font-weight:600;border:1px solid currentColor;white-space:nowrap}
+.pill.marco{color:var(--marco)} .pill.miriam{color:var(--miriam)} .pill.both{color:var(--both)}
+.pill.sicuro{color:var(--ok)} .pill.probabile{color:var(--warn)} .pill.forse{color:var(--muted);border-style:dashed}
+.pill.zero{color:var(--muted);border-style:dashed;font-weight:500}
+.tools{display:flex;flex-direction:column;gap:10px}
+.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-height:44px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;white-space:nowrap;min-height:36px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);font-weight:600}
+.group-title{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:6px 2px 0}
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 14px;min-height:56px}
+.row:first-child{border-top:0}
+.row .name{font-weight:600;overflow-wrap:anywhere}
+.row .meta{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:3px}
+.row .n{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
+.row.inv{align-items:flex-start}
+.row.inv select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg);min-height:38px;max-width:150px}
+.st-da_inviare{border-left:4px solid var(--line)} .st-inviato{border-left:4px solid var(--warn)}
+.st-si{border-left:4px solid var(--ok)} .st-no{border-left:4px solid var(--no)}
+.missing{color:var(--warn);font-weight:600}
+.empty{color:var(--muted);text-align:center;padding:22px 12px;font-size:15px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav.tabs .in{display:flex;gap:4px;width:100%;max-width:640px;align-items:center}
+nav.tabs a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-weight:600;padding:10px 2px;border-radius:10px;font-size:14.5px}
+nav.tabs a[aria-current="page"]{color:var(--ink);background:var(--accent-soft)}
+nav.tabs .add{flex:0 0 auto;background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:10px 16px;font-weight:700;min-height:44px}
+dialog{border:0;padding:0;margin:auto auto 0;width:100%;max-width:640px;max-height:92%;background:var(--surface);color:var(--ink);border-radius:18px 18px 0 0}
+dialog::backdrop{background:rgba(40,55,45,.3)}
+form.sheet{display:flex;flex-direction:column;gap:14px;padding:18px 16px 20px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label,.field .lab{font-size:13.5px;font-weight:600;color:var(--muted)}
+.field input[type=text],.field input[type=tel],.field select,.field textarea{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-height:44px;width:100%}
+.seg{display:flex;gap:6px}
+.seg label{flex:1;position:relative}
+.seg input{position:absolute;opacity:0;inset:0}
+.seg span{display:block;text-align:center;border:1px solid var(--line);border-radius:10px;padding:10px 4px;font-weight:600;font-size:14.5px;color:var(--ink);background:var(--surface)}
+.seg input:checked+span{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.seg input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:20px;font-weight:700}
+.stepper output{min-width:28px;text-align:center;font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions .btn{flex:1}
+details.more summary{font-weight:600;color:var(--accent);padding:6px 0;cursor:pointer}
+details.more .inner{display:flex;flex-direction:column;gap:14px;padding-top:8px}
+.sheetbox{display:flex;flex-direction:column;gap:14px;padding:18px 16px 20px}
+.room{position:relative;aspect-ratio:4/5;background-color:var(--surface);background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:20px 20px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tbl{position:absolute;transform:translate(-50%,-50%);touch-action:none;border:2px solid var(--accent);background:var(--accent-soft);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11.5px;line-height:1.15;padding:2px;cursor:grab;user-select:none;-webkit-user-select:none}
+.tbl.round{border-radius:50%} .tbl.square{border-radius:10px}
+.tbl.sposi{background:var(--accent);color:var(--accent-ink);font-size:13px}
+.tbl b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.tbl span{font-variant-numeric:tabular-nums}
+.tbl.full{border-color:var(--ok)} .tbl.over{border-color:var(--no);color:var(--no)}
+.hint{margin:0;color:var(--muted);font-size:14px}
+.seat{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.seat:first-child{border-top:0}
+.toast{position:fixed;left:16px;right:16px;bottom:84px;margin:0 auto;max-width:420px;background:var(--accent);color:var(--accent-ink);padding:10px 14px;border-radius:10px;font-size:14.5px;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Lista invitati</h1>
+    <button class="btn small" type="button" id="swapBtn">Scambia lista</button>
+  </header>
+  <div id="banner" hidden class="banner"></div>
+  <section class="summary" id="summary" aria-label="Riepilogo"></section>
+  <main id="view"></main>
+</div>
+
+<nav class="tabs" aria-label="Sezioni">
+  <div class="in">
+    <a href="#guida" data-tab="guida">Guida</a>
+    <a href="#lista" data-tab="lista">Lista</a>
+    <a href="#inviti" data-tab="inviti">Inviti</a>
+    <a href="#tavoli" data-tab="tavoli">Tavoli</a>
+    <button class="add" type="button" id="addBtn" aria-label="Aggiungi invito">+ Invito</button>
+  </div>
+</nav>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form class="sheet" id="form" novalidate>
+    <h2 id="dlgTitle">Nuovo invito</h2>
+    <div class="field">
+      <label for="f-name">Nome della persona o del nucleo</label>
+      <input type="text" id="f-name" autocomplete="off" placeholder="Es. Zio Franco e zia Rosa" maxlength="120">
+    </div>
+    <div class="field">
+      <span class="lab">Da parte di</span>
+      <div class="seg" role="radiogroup" aria-label="Da parte di">
+        <label><input type="radio" name="side" id="f-side-marco" value="marco"><span>Marco</span></label>
+        <label><input type="radio" name="side" id="f-side-miriam" value="miriam"><span>Miriam</span></label>
+        <label><input type="radio" name="side" id="f-side-both" value="both"><span>Entrambi</span></label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-cat">Categoria</label>
+      <select id="f-cat"></select>
+    </div>
+    <div class="two">
+      <div class="field"><span class="lab">Adulti</span>
+        <div class="stepper"><button type="button" data-step="adults" data-d="-1" aria-label="Un adulto in meno">−</button><output id="f-adults">2</output><button type="button" data-step="adults" data-d="1" aria-label="Un adulto in più">+</button></div></div>
+      <div class="field"><span class="lab">Bambini</span>
+        <div class="stepper"><button type="button" data-step="kids" data-d="-1" aria-label="Un bambino in meno">−</button><output id="f-kids">0</output><button type="button" data-step="kids" data-d="1" aria-label="Un bambino in più">+</button></div></div>
+    </div>
+    <div class="field">
+      <span class="lab">Quanto siete sicuri di invitarli</span>
+      <div class="seg" role="radiogroup" aria-label="Certezza">
+        <label><input type="radio" name="sure" id="f-sure-sicuro" value="sicuro"><span>Sicuro</span></label>
+        <label><input type="radio" name="sure" id="f-sure-probabile" value="probabile"><span>Probabile</span></label>
+        <label><input type="radio" name="sure" id="f-sure-forse" value="forse"><span>Forse</span></label>
+      </div>
+    </div>
+    <details class="more" id="f-more">
+      <summary>Dati per l'invito (potete compilarli dopo)</summary>
+      <div class="inner">
+        <div class="field">
+          <label for="f-mode">Come arriva l'invito</label>
+          <select id="f-mode">
+            <option value="">Da decidere</option>
+            <option value="cartaceo">Partecipazione cartacea per posta</option>
+            <option value="mano">Partecipazione consegnata a mano</option>
+            <option value="whatsapp">Messaggio WhatsApp</option>
+          </select>
+        </div>
+        <div class="field"><label for="f-phone">Telefono</label><input type="tel" id="f-phone" autocomplete="off" maxlength="40"></div>
+        <div class="field"><label for="f-addr">Indirizzo</label><textarea id="f-addr" rows="2" maxlength="300"></textarea></div>
+        <div class="field"><label for="f-notes">Note</label><textarea id="f-notes" rows="2" maxlength="500" placeholder="Es. vegetariana, viene da fuori, serve il seggiolone"></textarea></div>
+      </div>
+    </details>
+    <div class="actions">
+      <button class="btn primary" type="submit" id="saveBtn">Salva</button>
+      <button class="btn" type="button" id="saveMoreBtn">Salva e aggiungi un altro</button>
+    </div>
+    <div class="actions">
+      <button class="btn" type="button" id="cancelBtn">Annulla</button>
+      <button class="btn danger" type="button" id="delBtn" hidden>Elimina</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="tdlg" aria-label="Tavolo"><div class="sheetbox" id="tdlgBody"></div></dialog>
+<dialog id="swap" aria-labelledby="swapTitle">
+  <div class="sheet" style="display:flex;flex-direction:column;gap:14px;padding:18px 16px 20px">
+    <h2 id="swapTitle">Scambia la lista tra i telefoni</h2>
+    <p style="margin:0;color:var(--muted);font-size:14.5px">La lista è salvata su questo telefono. Per allinearvi, uno invia la propria copia (per esempio su WhatsApp) e l'altro la carica qui: le due liste vengono unite e, per ogni voce, vale la modifica più recente. La copia inviata fa anche da salvataggio di sicurezza.</p>
+    <button class="btn primary" type="button" id="expBtn">Invia la mia copia</button>
+    <label class="btn" for="impFile" style="text-align:center;display:flex;align-items:center;justify-content:center">Carica una copia ricevuta</label>
+    <input type="file" id="impFile" accept=".txt,.json,text/plain,application/json" style="position:absolute;width:1px;height:1px;opacity:0">
+    <button class="btn" type="button" id="swapClose">Chiudi</button>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var SIDES={marco:"Marco",miriam:"Miriam",both:"Entrambi"};
+var SURE={sicuro:"Sicuro",probabile:"Probabile",forse:"Forse"};
+var STATUS={da_inviare:"Da inviare",inviato:"Inviato",si:"Viene",no:"Non viene"};
+var MODES={"":"Da decidere",cartaceo:"Cartaceo per posta",mano:"Cartaceo a mano",whatsapp:"WhatsApp"};
+var CATS=[
+ {id:"famiglia",t:"Famiglia stretta",q:"Genitori, fratelli e sorelle con le loro famiglie, nonni."},
+ {id:"parenti",t:"Zii e cugini",q:"Procedete un ramo alla volta: prima il lato materno, poi il paterno. Zii, cugini, prozii."},
+ {id:"testimoni",t:"Testimoni e amici più cari",q:"Le persone che non possono mancare per nessun motivo."},
+ {id:"amici",t:"Amici",q:"Scuola, università, comitiva, sport, amici che vivono lontano. Scorrete la rubrica e le chat."},
+ {id:"colleghi",t:"Colleghi",q:"Colleghi di oggi e di ieri. Decidete una regola uguale per tutti e due."},
+ {id:"famiglie",t:"Amici di famiglia e vicini",q:"Gli invitati che stanno a cuore ai vostri genitori: chiedete a loro un elenco."},
+ {id:"altri",t:"Altri",q:"Celebrante, padrini e madrine, chi vi ha invitato al proprio matrimonio."}
+];
+var CATNAME={}; CATS.forEach(function(c){CATNAME[c.id]=c.t;});
+
+var state={guests:[],target:0,tab:"guida",q:"",fSide:"",fSure:"",loaded:false,readonly:false,editing:null,delArmed:false};
+var KEY="nozze-lista-v1";state.all=[];state.targetAt=0;state.tablesAll=[];state.tables=[];state.tEdit=null;state.tDelArmed=false;
+var SEED={"guests":[{"id":"xl-1","name":"Mamma Raffaella, Papà Ettore, Anna","side":"miriam","cat":"famiglia","adults":3,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220185,"updatedAt":1794753220185},{"id":"xl-2","name":"Ilaria, Mimmo","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220186,"updatedAt":1794753220185},{"id":"xl-3","name":"Zio Salvatore, Zia Carmela, Martina, Simone, Cristian, Nonna Anna","side":"miriam","cat":"parenti","adults":6,"kids":0,"sure":"probabile","mode":"","phone":"","addr":"","notes":"Da verificare: Nonna Anna","status":"da_inviare","createdAt":1794753220187,"updatedAt":1794753220185},{"id":"xl-4","name":"Aldo, Marika","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220188,"updatedAt":1794753220185},{"id":"xl-5","name":"Zia Maria","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220189,"updatedAt":1794753220185},{"id":"xl-6","name":"Zio Franco, Zia Pina","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220190,"updatedAt":1794753220185},{"id":"xl-7","name":"Mimmo, Filly, Alessandro","side":"miriam","cat":"parenti","adults":3,"kids":0,"sure":"probabile","mode":"","phone":"","addr":"","notes":"Da verificare: Alessandro","status":"da_inviare","createdAt":1794753220191,"updatedAt":1794753220185},{"id":"xl-8-9","name":"Zio Nico, Ivan, Moglie Ivan, Marika","side":"miriam","cat":"parenti","adults":4,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Gruppi 8 e 9 del foglio","status":"da_inviare","createdAt":1794753220192,"updatedAt":1794753220185},{"id":"xl-10","name":"Zio Tiziano, Zia Sonia, figlio, figlia","side":"miriam","cat":"parenti","adults":4,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"figlio: Figlio di zio Tiziano e zia Sonia · figlia: Figlia di zio Tiziano e zia Sonia","status":"da_inviare","createdAt":1794753220193,"updatedAt":1794753220185},{"id":"xl-11","name":"Zia Marcella","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220194,"updatedAt":1794753220185},{"id":"xl-12","name":"Zia Ketty, Roberta, Andrea, Giulia","side":"miriam","cat":"parenti","adults":4,"kids":0,"sure":"probabile","mode":"","phone":"","addr":"","notes":"Da verificare: Giulia","status":"da_inviare","createdAt":1794753220195,"updatedAt":1794753220185},{"id":"xl-13","name":"Zia Maria, Perfetto","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Perfetto: ma chi è ??","status":"da_inviare","createdAt":1794753220196,"updatedAt":1794753220185},{"id":"xl-14","name":"Mimma, Rodolfo","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220197,"updatedAt":1794753220185},{"id":"xl-15","name":"Marilena, marito","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Bologna · marito: Marito di Marilena","status":"da_inviare","createdAt":1794753220198,"updatedAt":1794753220185},{"id":"xl-16","name":"Cristina, Angelo","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Bologna","status":"da_inviare","createdAt":1794753220199,"updatedAt":1794753220185},{"id":"xl-17","name":"Vivian","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Gallipoli","status":"da_inviare","createdAt":1794753220200,"updatedAt":1794753220185},{"id":"xl-18","name":"Lucia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220201,"updatedAt":1794753220185},{"id":"xl-19","name":"Flavia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220202,"updatedAt":1794753220185},{"id":"xl-20","name":"Benny","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220203,"updatedAt":1794753220185},{"id":"xl-21","name":"Rosy","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220204,"updatedAt":1794753220185},{"id":"xl-22","name":"Claudia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220205,"updatedAt":1794753220185},{"id":"xl-23","name":"Mariagrazia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220206,"updatedAt":1794753220185},{"id":"xl-24","name":"Ester","side":"both","cat":"amici","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov) · Ester: Sul foglio: '?'","status":"da_inviare","createdAt":1794753220207,"updatedAt":1794753220185},{"id":"xl-25","name":"Simona","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220208,"updatedAt":1794753220185},{"id":"xl-26","name":"Lovi, Nico","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220209,"updatedAt":1794753220185},{"id":"xl-27","name":"Mary, Valerio","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220210,"updatedAt":1794753220185},{"id":"xl-28","name":"Chiara, Andrea","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220211,"updatedAt":1794753220185},{"id":"xl-29","name":"Fabio","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","status":"da_inviare","createdAt":1794753220212,"updatedAt":1794753220185},{"id":"xl-30","name":"Michele, Pina","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220213,"updatedAt":1794753220185},{"id":"xl-31","name":"Bubu, moglie","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"moglie: Moglie di Bubu","status":"da_inviare","createdAt":1794753220214,"updatedAt":1794753220185},{"id":"xl-32","name":"Annalisa, Marco","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","status":"da_inviare","createdAt":1794753220215,"updatedAt":1794753220185},{"id":"xl-33","name":"Cosimo, Irene","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","status":"da_inviare","createdAt":1794753220216,"updatedAt":1794753220185},{"id":"xl-34","name":"Lucia, Antonello","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","status":"da_inviare","createdAt":1794753220217,"updatedAt":1794753220185},{"id":"xl-35","name":"Carlo, Anna","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","status":"da_inviare","createdAt":1794753220218,"updatedAt":1794753220185},{"id":"xl-36","name":"Mariano, Nata","side":"both","cat":"amici","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Barletta","status":"da_inviare","createdAt":1794753220219,"updatedAt":1794753220185},{"id":"xl-37","name":"Rocco, Patrizia, Marilena, Francesca","side":"marco","cat":"parenti","adults":4,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220220,"updatedAt":1794753220185},{"id":"xl-38","name":"Lena, Pino","side":"marco","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Lena: Sopra c'era 'RAOL', cancellato","status":"da_inviare","createdAt":1794753220221,"updatedAt":1794753220185},{"id":"xl-39","name":"Ale, Pamela","side":"marco","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220222,"updatedAt":1794753220185},{"id":"xl-40","name":"Luciana, Dario","side":"marco","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220223,"updatedAt":1794753220185},{"id":"xl-41","name":"Annamaria, Francesco","side":"marco","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220224,"updatedAt":1794753220185},{"id":"xl-44","name":"Ciccio Marang., moglie","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Ciccio Marang.: Cognome abbreviato sul foglio · moglie: Moglie di Ciccio","status":"da_inviare","createdAt":1794753220225,"updatedAt":1794753220185},{"id":"xl-45","name":"Tommaso, compagna","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"compagna: Compagna di Tommaso","status":"da_inviare","createdAt":1794753220226,"updatedAt":1794753220185},{"id":"xl-46","name":"Gaetano, Patrizia","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220227,"updatedAt":1794753220185},{"id":"xl-47","name":"Zia Rosaria","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220228,"updatedAt":1794753220185},{"id":"xl-48","name":"Carmen, marito","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"marito: Marito di Carmen","status":"da_inviare","createdAt":1794753220229,"updatedAt":1794753220185},{"id":"xl-43","name":"Antonella","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220230,"updatedAt":1794753220185},{"id":"xl-42","name":"Valeria Santoro","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Valeria Santoro: Numero 95 usato due volte sul foglio","status":"da_inviare","createdAt":1794753220231,"updatedAt":1794753220185},{"id":"xl-50","name":"Zio Enzo, moglie","side":"miriam","cat":"parenti","adults":2,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Zio Enzo: Sul foglio: '?'. Numero 95 usato due volte; gruppo 50 dedotto · moglie: Moglie di zio Enzo, sul foglio: '?'; gruppo 50 dedotto","status":"da_inviare","createdAt":1794753220232,"updatedAt":1794753220185},{"id":"xl-49","name":"Carolina, marito, figlie","side":"miriam","cat":"parenti","adults":3,"kids":0,"sure":"probabile","mode":"","phone":"","addr":"","notes":"Da verificare: figlie · marito: Marito di Carolina · figlie: 'FIGLIE?' accanto a Carmen: gruppo 48 dedotto","status":"da_inviare","createdAt":1794753220233,"updatedAt":1794753220185},{"id":"xl-51","name":"Zio Franco Dileo, Zia Fifina, Dileo Rocco, Moglie Rocco dileo zio Franco, Dileo Dora, Marito Dora","side":"marco","cat":"parenti","adults":6,"kids":0,"sure":"probabile","mode":"","phone":"","addr":"","notes":"Da verificare: Dileo Rocco (di Zio Franco), Moglie Rocco dileo zio Franco, Dileo Dora (Zio Franco), Marito Dora · Dileo Rocco (di Zio Franco): Cugino Marco - da verificare · Dileo Dora (Zio Franco): Cugina Marco - da Verificare · Tutti: Zio Franco Dileo, Zia Fifina, Dileo Rocco (di Zio Franco), Moglie Rocco dileo zio Franco, Dileo Dora (Zio Franco), Marito Dora","status":"da_inviare","createdAt":1794753220234,"updatedAt":1794753220185},{"id":"xl-52","name":"Zio Gino Dileo, Zia Enza, Dileo Rocco, Moglie di Rocco di zio Gino, Cugina Francesca Dileo, Marito Michele","side":"marco","cat":"parenti","adults":6,"kids":0,"sure":"probabile","mode":"","phone":"","addr":"","notes":"Da verificare: Dileo Rocco (di zio Gino), Moglie di Rocco di zio Gino · Dileo Rocco (di zio Gino): Cugino Marco - da verificare · Tutti: Zio Gino Dileo, Zia Enza (moglie di zio Gino), Dileo Rocco (di zio Gino), Moglie di Rocco di zio Gino, Cugina Francesca Dileo, Marito Michele","status":"da_inviare","createdAt":1794753220235,"updatedAt":1794753220185},{"id":"xl-53","name":"Zio Angelo Dileo, Zia Antonia di Zio Angelo, Massimo di Zio Angelo e altri 3","side":"marco","cat":"parenti","adults":6,"kids":0,"sure":"probabile","mode":"","phone":"","addr":"","notes":"Da verificare: Massimo di Zio Angelo, Moglie di Massimo · Massimo di Zio Angelo: Cugino Marco - da verificare · Tutti: Zio Angelo Dileo, Zia Antonia di Zio Angelo, Massimo di Zio Angelo, Moglie di Massimo, Cigina Doriana di zio Angelo, Cugino Gianluca di zio Angelo","status":"da_inviare","createdAt":1794753220236,"updatedAt":1794753220185},{"id":"xl-54","name":"Zio Enzo, moglie, Cugino Nunzio e altri 4","side":"marco","cat":"parenti","adults":7,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Tutti: Zio Enzo (da parte di Mamma), moglie, Cugino Nunzio, Moglie di Nunzioi, Cugina Nunzia, Marito di Nunzia, Zia Franca da parte di Mamma","status":"da_inviare","createdAt":1794753220237,"updatedAt":1794753220185},{"id":"xl-55","name":"Dileo Rocco Cugino (di zio Michele), moglie, Dileo Francesco Cugino (di zio Michele), moglie","side":"marco","cat":"parenti","adults":4,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220238,"updatedAt":1794753220185},{"id":"xl-56","name":"Zia Grazia, Mino","side":"marco","cat":"parenti","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220239,"updatedAt":1794753220185},{"id":"xl-col-pesenti","name":"Pesenti Marco (Collega), Moglie di Pesenti","side":"marco","cat":"colleghi","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220240,"updatedAt":1794753220185},{"id":"xl-col-silvestri","name":"Silvestri Marco (Collega)","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220241,"updatedAt":1794753220185},{"id":"xl-col-lorenzo","name":"Lorenzo Vitangeli (Collega), Maddalena Moglie di Lorenzo","side":"marco","cat":"colleghi","adults":2,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220242,"updatedAt":1794753220185},{"id":"xl-col-simone","name":"Simone Pellicciari (Collega)","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","status":"da_inviare","createdAt":1794753220243,"updatedAt":1794753220185},{"id":"xl-bambini","name":"Bambini da assegnare alle famiglie","side":"both","cat":"altri","adults":0,"kids":28,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Dal foglio Bambini: Maria Rita, Gabriele, Damiano, Marco, Francesco, Paula, Sofia, Bimba Ivan, Bianca Marika, Bianca, Virgy, Samuel, Figlia Marilena, Aida, Sole, Camilla, Emma, Lavinia, Martina, Beatrice, Francesca, Bimba Carlo Anna, Leya, Paola, Giuseppe, Irene, Diego, Samuel","status":"da_inviare","createdAt":1794753221085,"updatedAt":1794753220185},{"id":"xl-forn-0","name":"Fotografo (Raffaele Vestito)","side":"both","cat":"altri","adults":3,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Fornitore","status":"da_inviare","createdAt":1794753221135,"updatedAt":1794753220185},{"id":"xl-forn-1","name":"Band","side":"both","cat":"altri","adults":5,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Fornitore · da 4 a 5 persone","status":"da_inviare","createdAt":1794753221136,"updatedAt":1794753220185}]};
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function num(v){v=Number(v);return isFinite(v)&&v>0?Math.min(99,Math.floor(v)):0;}
+function people(g){return num(g.adults)+num(g.kids);}
+function pick(v,map,def){return Object.prototype.hasOwnProperty.call(map,v)?v:def;}
+function norm(id,d){d=d||{};return {id:id,name:String(d.name||"").slice(0,120),side:pick(d.side,SIDES,"both"),cat:pick(d.cat,CATNAME,"altri"),
+  adults:num(d.adults),kids:num(d.kids),sure:pick(d.sure,SURE,"sicuro"),mode:pick(d.mode||"",MODES,""),phone:String(d.phone||""),addr:String(d.addr||""),
+  notes:String(d.notes||""),table:String(d.table||"").slice(0,40),status:pick(d.status,STATUS,"da_inviare"),createdAt:Number(d.createdAt)||0};}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+var toastT;
+function toast(msg){var t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2600);}
+function banner(txt,err){var b=$("banner");if(!txt){b.hidden=true;return;}b.hidden=false;b.className="banner"+(err?" err":"");b.textContent=txt;}
+
+/* ---------- riepilogo ---------- */
+function renderSummary(){
+  var tot=0,forse=0,ad=0,ki=0,by={marco:0,miriam:0,both:0};
+  state.guests.forEach(function(g){var p=people(g);if(g.sure==="forse"){forse+=p;return;}tot+=p;ad+=num(g.adults);ki+=num(g.kids);by[g.side]+=p;});
+  var bar="";["marco","miriam","both"].forEach(function(s){if(tot&&by[s])bar+='<span style="width:'+(by[s]/tot*100)+'%;background:var(--'+s+')"></span>';});
+  var tgt=state.target?(tot>state.target?'<b style="color:var(--no)">'+(tot-state.target)+' in più</b>':'<b>'+(state.target-tot)+' posti liberi</b>'):"";
+  $("summary").innerHTML=
+   '<div class="sum-row"><div class="big">'+tot+'<small>persone'+(forse?' + '+forse+' forse':'')+'</small></div>'+
+   '<label class="target" for="target">Obiettivo <input id="target" type="number" inputmode="numeric" min="0" max="999" value="'+(state.target||"")+'" placeholder="–"></label></div>'+
+   '<div class="split" aria-hidden="true">'+bar+'</div>'+
+   '<div class="legend"><span><i class="dot" style="background:var(--marco)"></i>Marco <b>'+by.marco+'</b></span>'+
+   '<span><i class="dot" style="background:var(--miriam)"></i>Miriam <b>'+by.miriam+'</b></span>'+
+   '<span><i class="dot" style="background:var(--both)"></i>Entrambi <b>'+by.both+'</b></span>'+
+   '<span>Adulti <b>'+ad+'</b></span><span>Bambini <b>'+ki+'</b></span>'+(tgt?'<span>'+tgt+'</span>':'')+'</div>';
+}
+
+/* ---------- viste ---------- */
+function viewGuida(){
+  var h='<div class="tools"><div class="banner">Percorrete i passaggi uno alla volta, ognuno per la propria parte. Nel dubbio aggiungete e segnate <b>Forse</b>: a tagliare si fa sempre in tempo.</div>';
+  CATS.forEach(function(c,i){
+    var n={marco:0,miriam:0,both:0};
+    state.guests.forEach(function(g){if(g.cat===c.id)n[g.side]+=people(g);});
+    h+='<section class="card step"><div class="step-head"><div><div class="step-n">Passo '+(i+1)+' di '+CATS.length+'</div><h2>'+esc(c.t)+'</h2></div>'+
+       '<button class="btn small primary" type="button" data-add="'+c.id+'">Aggiungi</button></div><p>'+esc(c.q)+'</p><div class="counts">'+
+       ["marco","miriam","both"].map(function(s){return '<span class="pill '+(n[s]?s:"zero")+'">'+SIDES[s]+' '+n[s]+'</span>';}).join("")+'</div></section>';
+  });
+  var forse=state.guests.filter(function(g){return g.sure==="forse";}).length;
+  var noc=state.guests.filter(function(g){return !g.phone&&!g.addr;}).length;
+  h+='<section class="card step"><div class="step-n">Poi</div><h2>Ripassate insieme</h2>'+
+     '<p>1. Fissate l\'obiettivo in alto in base alla sala e al budget.<br>2. Decidete i Forse uno per uno'+(forse?' (ora sono '+forse+')':'')+'.<br>3. Completate telefono o indirizzo'+(noc?' (mancano per '+noc+' inviti)':'')+'.<br>4. Passate alla sezione Inviti per segnare chi è stato invitato e chi ha risposto.</p></section></div>';
+  return h;
+}
+function filtered(){
+  var q=state.q.trim().toLowerCase();
+  return state.guests.filter(function(g){
+    if(state.fSide&&g.side!==state.fSide)return false;
+    if(state.fSure&&g.sure!==state.fSure)return false;
+    if(q&&(g.name+" "+g.notes).toLowerCase().indexOf(q)<0)return false;
+    return true;});
+}
+function chips(){
+  var c=function(k,v,l){return '<button type="button" class="chip" data-f="'+k+'" data-v="'+v+'" aria-pressed="'+(state[k]===v)+'">'+l+'</button>';};
+  return '<div class="chips">'+c("fSide","","Tutti")+c("fSide","marco","Marco")+c("fSide","miriam","Miriam")+c("fSide","both","Entrambi")+'</div>'+
+         '<div class="chips">'+c("fSure","","Ogni certezza")+c("fSure","sicuro","Sicuri")+c("fSure","probabile","Probabili")+c("fSure","forse","Forse")+'</div>';
+}
+function viewLista(){
+  var h='<div class="tools"><input class="search" id="q" type="search" placeholder="Cerca per nome o nota" value="'+esc(state.q)+'" aria-label="Cerca">'+chips();
+  if(!state.guests.length){return h+'<div class="empty">La lista è vuota. Partite dalla Guida oppure toccate Aggiungi.</div></div>';}
+  var list=filtered();
+  if(!list.length)h+='<div class="empty">Nessun invito con questi filtri.</div>';
+  CATS.forEach(function(c){
+    var gs=list.filter(function(g){return g.cat===c.id;}).sort(function(a,b){return a.name.localeCompare(b.name,"it");});
+    if(!gs.length)return;
+    var p=gs.reduce(function(s,g){return s+people(g);},0);
+    h+='<div class="group-title"><span>'+esc(c.t)+'</span><span>'+p+' persone</span></div><div class="rows">'+gs.map(function(g){
+      return '<button type="button" class="row" data-edit="'+esc(g.id)+'"><span><span class="name">'+esc(g.name||"Senza nome")+'</span>'+
+        '<span class="meta"><span class="pill '+g.side+'">'+SIDES[g.side]+'</span><span class="pill '+g.sure+'">'+SURE[g.sure]+'</span>'+
+        (num(g.kids)?'<span>'+num(g.adults)+' adulti, '+num(g.kids)+' bambini</span>':'')+(tableOf(g)?'<span>'+esc(tableOf(g).name)+'</span>':'')+'</span></span><span class="n">'+people(g)+'</span></button>';
+    }).join("")+'</div>';
+  });
+  return h+'</div>';
+}
+function viewInviti(){
+  var gs=state.guests.filter(function(g){return g.sure!=="forse";});
+  var c={da_inviare:0,inviato:0,si:0,no:0},pSi=0;
+  gs.forEach(function(g){c[g.status]++;if(g.status==="si")pSi+=people(g);});
+  var h='<div class="tools"><section class="card"><h2>Stato degli inviti</h2><div class="legend">'+
+    '<span>Da inviare <b>'+c.da_inviare+'</b></span><span>Inviati <b>'+c.inviato+'</b></span><span>Vengono <b>'+c.si+'</b> ('+pSi+' persone)</span><span>Non vengono <b>'+c.no+'</b></span></div>'+
+    '<div class="actions"><button class="btn small" type="button" id="copyCsv">Copia elenco per Excel</button><button class="btn small" type="button" id="copyTxt">Copia nomi e telefoni</button></div></section>';
+  if(!gs.length)return h+'<div class="empty">Qui compaiono gli inviti segnati come Sicuro o Probabile.</div></div>';
+  gs=gs.slice().sort(function(a,b){var o=["da_inviare","inviato","si","no"];return o.indexOf(a.status)-o.indexOf(b.status)||a.name.localeCompare(b.name,"it");});
+  h+='<div class="rows">'+gs.map(function(g){
+    var contact=g.phone||g.addr;
+    return '<div class="row inv st-'+g.status+'"><button type="button" data-edit="'+esc(g.id)+'" style="all:unset;cursor:pointer;flex:1;min-width:0"><span class="name">'+esc(g.name||"Senza nome")+'</span>'+
+      '<span class="meta"><span>'+people(g)+' pers.</span><span>'+esc(MODES[g.mode])+'</span>'+(contact?'<span>'+esc(g.phone||g.addr)+'</span>':'<span class="missing">Manca il contatto</span>')+'</span></button>'+
+      '<select data-status="'+esc(g.id)+'" id="st-'+esc(g.id)+'" aria-label="Stato invito di '+esc(g.name)+'">'+Object.keys(STATUS).map(function(k){return '<option value="'+k+'"'+(k===g.status?' selected':'')+'>'+STATUS[k]+'</option>';}).join("")+'</select></div>';
+  }).join("")+'</div></div>';
+  return h;
+}
+function tblHtml(t){
+  var occ=occupancy(t.id),sp=t.id==="t-sposi",size=Math.round(50+Math.min(t.seats,14)*2.2);
+  var st=sp?"width:108px;height:46px":"width:"+size+"px;height:"+size+"px";
+  return '<button type="button" class="tbl '+t.shape+(sp?" sposi":occ>t.seats?" over":occ===t.seats?" full":"")+'" data-tbl="'+esc(t.id)+'" style="left:'+t.x+'%;top:'+t.y+'%;'+st+'" aria-label="'+esc(t.name)+', '+occ+(sp?' ospiti':' di '+t.seats+' posti')+'"><b>'+esc(t.name||"Tavolo")+'</b>'+(sp?(occ?'<span>+'+occ+'</span>':''):'<span>'+occ+'/'+t.seats+'</span>')+'</button>';
+}
+function viewTavoli(){
+  var todo=0,done=0,seats=0;
+  state.guests.forEach(function(g){if(g.sure==="forse")return;var p=people(g);if(tableOf(g))done+=p;else todo+=p;});
+  var ts=state.tables.slice().sort(function(a,b){return (a.id==="t-sposi"?0:1)-(b.id==="t-sposi"?0:1)||a.name.localeCompare(b.name,"it",{numeric:true});});
+  ts.forEach(function(t){if(t.id!=="t-sposi")seats+=t.seats;});
+  var h='<div class="tools"><section class="card"><h2>Sala e tavoli</h2><div class="legend"><span>Tavoli <b>'+(ts.length-1)+'</b></span><span>Posti <b>'+seats+'</b></span><span>Sistemati <b>'+done+'</b></span><span>Da sistemare <b>'+todo+'</b></span></div>'+
+    '<div class="actions"><button class="btn small" type="button" data-newt="round">+ Tavolo rotondo</button><button class="btn small" type="button" data-newt="square">+ Tavolo quadrato</button></div></section>'+
+    '<div class="room" id="room" role="group" aria-label="Pianta della sala">'+ts.map(tblHtml).join("")+'</div>'+
+    '<p class="hint">Trascinate i tavoli per disporli nella sala rispetto al tavolo degli sposi. Toccate un tavolo per cambiare nome, forma e posti e per scegliere chi si siede.</p>'+
+    '<div class="group-title"><span>Elenco tavoli</span><span>'+done+' persone sistemate</span></div><div class="rows">'+ts.map(function(t){
+      var gs=state.guests.filter(function(g){return g.table===t.id;}),occ=occupancy(t.id),sp=t.id==="t-sposi";
+      return '<button type="button" class="row" data-tbl="'+esc(t.id)+'"><span><span class="name">'+esc(t.name||"Tavolo")+'</span><span class="meta"><span>'+(gs.length?esc(gs.map(function(g){return g.name;}).join(" · ")):"Nessuno seduto")+'</span></span></span><span class="n"'+(!sp&&occ>t.seats?' style="color:var(--no)"':'')+'>'+(sp?(occ?"+"+occ:""):occ+"/"+t.seats)+'</span></button>';
+    }).join("")+'</div></div>';
+  return h;
+}
+function renderTableDlg(){
+  var t=state.tables.filter(function(x){return x.id===state.tEdit&&!x.deleted;})[0],dlg=$("tdlg");
+  if(!t){state.tEdit=null;if(dlg.open)dlg.close();return;}
+  var sp=t.id==="t-sposi",occ=occupancy(t.id);
+  var seated=state.guests.filter(function(g){return g.table===t.id;});
+  var free=state.guests.filter(function(g){return !tableOf(g)&&g.sure!=="forse";}).sort(function(a,b){return a.name.localeCompare(b.name,"it");});
+  $("tdlgBody").innerHTML='<h2>'+(sp?"Tavolo degli sposi":"Tavolo")+'</h2>'+
+    '<div class="field"><label for="t-name">Nome</label><input type="text" id="t-name" maxlength="30" autocomplete="off" value="'+esc(t.name)+'"></div>'+
+    '<div class="field"><span class="lab">Forma</span><div class="seg" role="radiogroup" aria-label="Forma"><label><input type="radio" name="tshape" id="t-shape-round" value="round"'+(t.shape==="round"?" checked":"")+'><span>Rotondo</span></label><label><input type="radio" name="tshape" id="t-shape-square" value="square"'+(t.shape==="square"?" checked":"")+'><span>Quadrato</span></label></div></div>'+
+    (sp?'':'<div class="field"><span class="lab">Posti</span><div class="stepper"><button type="button" data-tseat="-1" aria-label="Un posto in meno">−</button><output id="t-seats">'+t.seats+'</output><button type="button" data-tseat="1" aria-label="Un posto in più">+</button></div></div>')+
+    '<div class="field"><span class="lab">Seduti qui: '+occ+(sp?' oltre a voi due':' su '+t.seats)+(!sp&&occ>t.seats?' <b style="color:var(--no)">('+(occ-t.seats)+' di troppo)</b>':'')+'</span><div>'+
+      (seated.length?seated.map(function(g){return '<div class="seat"><span><b>'+esc(g.name)+'</b> <span class="hint">'+people(g)+' pers.</span></span><button type="button" class="btn small" data-unseat="'+esc(g.id)+'">Togli</button></div>';}).join(""):'<p class="hint">Ancora nessuno.</p>')+'</div></div>'+
+    '<div class="field"><label for="t-addg">Fai sedere un nucleo</label><select id="t-addg"><option value="">'+(free.length?'Scegli tra i '+free.length+' da sistemare':'Tutti hanno già un tavolo')+'</option>'+free.map(function(g){return '<option value="'+esc(g.id)+'">'+esc(g.name)+' ('+people(g)+')</option>';}).join("")+'</select></div>'+
+    '<div class="actions"><button class="btn primary" type="button" data-tclose="1">Fatto</button>'+(sp?'':'<button class="btn danger" type="button" data-tdel="1">'+(state.tDelArmed?"Tocca ancora per eliminare":"Elimina tavolo")+'</button>')+'</div>';
+  if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");}
+}
+function render(){
+  renderSummary();
+  var v=$("view"),keep=document.activeElement&&document.activeElement.id==="q";
+  v.innerHTML=state.tab==="lista"?viewLista():state.tab==="inviti"?viewInviti():state.tab==="tavoli"?viewTavoli():viewGuida();
+  if(state.tEdit)renderTableDlg();
+  if(keep){var q=$("q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
+  Array.prototype.forEach.call(document.querySelectorAll("nav.tabs a"),function(a){
+    if(a.dataset.tab===state.tab)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});
+}
+function route(){var h=(location.hash||"").replace("#","");state.tab=(h==="lista"||h==="inviti"||h==="guida"||h==="tavoli")?h:(state.guests.length?"lista":"guida");render();}
+
+/* ---------- salvataggio ---------- */
+function failed(e){
+  if(e&&e.code==="invalid_argument"){state.readonly=true;banner("Puoi vedere la lista ma non modificarla. Chiedi a chi ha creato la pagina di condividerla con te come Editor.",true);}
+  else if(e&&e.code==="quota_exceeded"){toast("Spazio esaurito: eliminate qualche voce.");}
+  else toast("Salvataggio non riuscito. Riprovate tra poco.");
+}
+function clean(r){if(!r||typeof r.id!=="string"||!/^[A-Za-z0-9_-]{1,40}$/.test(r.id))return null;var g=norm(r.id,r);g.updatedAt=Number(r.updatedAt)||0;g.deleted=!!r.deleted;return g;}
+function cleanT(r){if(!r||typeof r.id!=="string"||!/^[A-Za-z0-9_-]{1,40}$/.test(r.id))return null;
+  var x=Number(r.x),y=Number(r.y);
+  return {id:r.id,name:String(r.name||"").slice(0,30),shape:r.shape==="square"?"square":"round",seats:Math.max(1,Math.min(30,num(r.seats)||8)),
+    x:isFinite(x)?Math.max(6,Math.min(94,x)):50,y:isFinite(y)?Math.max(6,Math.min(94,y)):50,updatedAt:Number(r.updatedAt)||0,deleted:!!r.deleted};}
+function refresh(){
+  state.guests=state.all.filter(function(g){return !g.deleted;});
+  if(!state.tablesAll.some(function(t){return t.id==="t-sposi";}))state.tablesAll.push(cleanT({id:"t-sposi",name:"Sposi",shape:"square",seats:2,x:50,y:10,updatedAt:0}));
+  state.tables=state.tablesAll.filter(function(t){return !t.deleted||t.id==="t-sposi";});
+}
+function tableOf(g){if(!g.table)return null;for(var i=0;i<state.tables.length;i++)if(state.tables[i].id===g.table)return state.tables[i];return null;}
+function occupancy(id){var n=0;state.guests.forEach(function(g){if(g.table===id)n+=people(g);});return n;}
+function patchTable(id,patch){
+  state.tablesAll=state.tablesAll.map(function(x){if(x.id!==id)return x;var o={};for(var k in x)o[k]=x[k];for(var p in patch)o[p]=patch[p];o.updatedAt=Date.now();return cleanT(o);});
+  return commit();
+}
+function addTable(shape){
+  var n=state.tables.length,i=n-1,cols=[20,50,80];
+  var t=cleanT({id:"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:"Tavolo "+n,shape:shape,seats:shape==="round"?10:8,x:cols[i%3],y:Math.min(90,30+Math.floor(i/3)%4*19),updatedAt:Date.now()});
+  state.tablesAll.push(t);commit();toast(t.name+" aggiunto: trascinatelo al suo posto.");
+}
+function persist(){
+  try{localStorage.setItem(KEY,JSON.stringify({app:"lista-invitati-nozze",v:1,guests:state.all,tables:state.tablesAll,target:state.target,targetAt:state.targetAt}));banner("");}
+  catch(e){banner("Questo browser non permette di salvare la lista (forse è in navigazione privata). Le modifiche si perdono chiudendo la pagina.",true);}
+}
+function commit(){refresh();persist();render();return Promise.resolve();}
+function newId(){return "g"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function saveGuest(id,data){
+  var g=clean({id:id||newId(),name:data.name,side:data.side,cat:data.cat,adults:data.adults,kids:data.kids,sure:data.sure,mode:data.mode,phone:data.phone,addr:data.addr,notes:data.notes,table:data.table,status:data.status,createdAt:data.createdAt,updatedAt:Date.now()});
+  if(id)state.all=state.all.map(function(x){return x.id===id?g:x;});else state.all.push(g);
+  return commit();
+}
+function patchGuest(id,patch){
+  state.all=state.all.map(function(x){if(x.id!==id)return x;var o={};for(var k in x)o[k]=x[k];for(var p in patch)o[p]=patch[p];o.updatedAt=Date.now();return clean(o);});
+  return commit();
+}
+function delGuest(id){return patchGuest(id,{deleted:true});}
+function merge(d){
+  var n=0,map={};state.all.forEach(function(g){map[g.id]=g;});
+  (Array.isArray(d.guests)?d.guests:[]).slice(0,5000).forEach(function(r){var g=clean(r);if(!g)return;var old=map[g.id];if(!old||g.updatedAt>old.updatedAt){map[g.id]=g;n++;}});
+  state.all=Object.keys(map).map(function(k){return map[k];});
+  var tm={};state.tablesAll.forEach(function(t){tm[t.id]=t;});
+  (Array.isArray(d.tables)?d.tables:[]).slice(0,300).forEach(function(r){var t=cleanT(r);if(!t)return;var old=tm[t.id];if(!old||t.updatedAt>old.updatedAt){tm[t.id]=t;n++;}});
+  state.tablesAll=Object.keys(tm).map(function(k){return tm[k];});
+  var ta=Number(d.targetAt)||0;if(ta>state.targetAt){state.targetAt=ta;var t=Number(d.target);state.target=isFinite(t)&&t>0?Math.min(999,Math.floor(t)):0;}
+  return n;
+}
+function payload(){return JSON.stringify({app:"lista-invitati-nozze",v:1,exportedAt:Date.now(),guests:state.all,tables:state.tablesAll,target:state.target,targetAt:state.targetAt});}
+function exportCopy(){
+  var name="lista-invitati.txt",text=payload();
+  try{var f=new File([text],name,{type:"text/plain"});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:"Lista invitati"}).catch(function(){});return;}}catch(e){}
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"}));a.download=name;document.body.appendChild(a);a.click();a.remove();
+  toast("Copia scaricata: inviate il file lista-invitati.txt.");
+}
+function importCopy(file){
+  var r=new FileReader();
+  r.onload=function(){
+    var d;try{d=JSON.parse(String(r.result));}catch(e){d=null;}
+    if(!d||d.app!=="lista-invitati-nozze"){toast("Questo file non è una copia della lista.");return;}
+    var n=merge(d);commit();toast(n?"Liste unite: "+n+" voci aggiornate.":"Nessuna novità: le liste erano già uguali.");
+    var dlg=$("swap");if(dlg.close)dlg.close();
+  };
+  r.onerror=function(){toast("Non riesco a leggere il file.");};
+  r.readAsText(file);
+}
+
+/* ---------- modulo ---------- */
+var fAdults=2,fKids=0;
+function setRadio(name,v){var el=document.querySelector('input[name="'+name+'"][value="'+v+'"]');if(el)el.checked=true;}
+function getRadio(name){var el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:"";}
+function openForm(g,defaults){
+  state.editing=g?g.id:null;state.delArmed=false;
+  var d=g||{name:"",side:lsGet("inv-side")||"marco",cat:(defaults&&defaults.cat)||lsGet("inv-cat")||"famiglia",adults:2,kids:0,sure:"sicuro",mode:"",phone:"",addr:"",notes:""};
+  $("dlgTitle").textContent=g?"Modifica invito":"Nuovo invito";
+  $("f-name").value=d.name;setRadio("side",pick(d.side,SIDES,"marco"));$("f-cat").value=d.cat;
+  fAdults=num(d.adults);fKids=num(d.kids);$("f-adults").textContent=fAdults;$("f-kids").textContent=fKids;
+  setRadio("sure",d.sure);$("f-mode").value=d.mode;$("f-phone").value=d.phone;$("f-addr").value=d.addr;$("f-notes").value=d.notes;
+  $("f-more").open=!!(g&&(d.mode||d.phone||d.addr||d.notes));
+  $("delBtn").hidden=!g;$("delBtn").textContent="Elimina";$("saveMoreBtn").hidden=!!g;
+  var dlg=$("dlg");if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");}
+  if(!g)$("f-name").focus();
+}
+function closeForm(){var dlg=$("dlg");if(dlg.close)dlg.close();else dlg.removeAttribute("open");}
+function submit(again){
+  if(state.readonly){toast("Non hai il permesso di modificare.");return;}
+  var name=$("f-name").value.trim();
+  if(!name){toast("Scrivete un nome.");$("f-name").focus();return;}
+  if(fAdults+fKids<1){toast("Serve almeno una persona.");return;}
+  var old=state.editing?state.guests.filter(function(g){return g.id===state.editing;})[0]:null;
+  var data={name:name,side:getRadio("side")||"both",cat:$("f-cat").value,adults:fAdults,kids:fKids,sure:getRadio("sure")||"sicuro",
+    mode:$("f-mode").value,phone:$("f-phone").value.trim(),addr:$("f-addr").value.trim(),notes:$("f-notes").value.trim(),
+    table:old?old.table:"",status:old?old.status:"da_inviare",createdAt:old&&old.createdAt?old.createdAt:Date.now()};
+  lsSet("inv-side",data.side);lsSet("inv-cat",data.cat);
+  var b1=$("saveBtn"),b2=$("saveMoreBtn");b1.disabled=b2.disabled=true;
+  saveGuest(state.editing,data).then(function(){
+    toast("Salvato: "+name);
+    if(again){openForm(null,{cat:data.cat});}else closeForm();
+  },failed).then(function(){b1.disabled=b2.disabled=false;});
+}
+
+/* ---------- copia ---------- */
+function copy(text,ok){
+  var done=function(){toast(ok);},fb=function(){toast("Copia non riuscita su questo dispositivo.");};
+  try{navigator.clipboard.writeText(text).then(done,fb);}catch(e){fb();}
+}
+function csv(){
+  var cell=function(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';};
+  var rows=[["Nome","Da parte di","Categoria","Adulti","Bambini","Certezza","Invito","Telefono","Indirizzo","Stato","Tavolo","Note"]];
+  state.guests.forEach(function(g){rows.push([g.name,SIDES[g.side],CATNAME[g.cat],num(g.adults),num(g.kids),SURE[g.sure],MODES[g.mode],g.phone,g.addr,STATUS[g.status],tableOf(g)?tableOf(g).name:"",g.notes]);});
+  return rows.map(function(r){return r.map(cell).join(";");}).join("\n");
+}
+
+/* ---------- eventi ---------- */
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-add],[data-edit],[data-f],[data-step]");
+  if(t){
+    if(t.dataset.add){openForm(null,{cat:t.dataset.add});return;}
+    if(t.dataset.edit){var g=state.guests.filter(function(x){return x.id===t.dataset.edit;})[0];if(g)openForm(g);return;}
+    if(t.dataset.f){state[t.dataset.f]=t.dataset.v;render();return;}
+    if(t.dataset.step){
+      if(t.dataset.step==="adults"){fAdults=Math.max(0,Math.min(20,fAdults+Number(t.dataset.d)));$("f-adults").textContent=fAdults;}
+      else{fKids=Math.max(0,Math.min(20,fKids+Number(t.dataset.d)));$("f-kids").textContent=fKids;}
+      return;}
+  }
+  if(e.target.id==="copyCsv")copy(csv(),"Elenco copiato: incollatelo in Excel o Fogli Google.");
+  if(e.target.id==="copyTxt")copy(state.guests.filter(function(g){return g.sure!=="forse";}).map(function(g){return g.name+(g.phone?" – "+g.phone:"");}).join("\n"),"Nomi e telefoni copiati.");
+});
+document.addEventListener("input",function(e){if(e.target.id==="q"){state.q=e.target.value;render();}});
+document.addEventListener("change",function(e){
+  var t=e.target;
+  if(t.dataset&&t.dataset.status){
+    if(state.readonly){toast("Non hai il permesso di modificare.");render();return;}
+    patchGuest(t.dataset.status,{status:t.value}).catch(failed);
+  }
+  if(t.id==="target"){
+    var v=num(t.value);if(v>999)v=999;
+    state.target=v;state.targetAt=Date.now();commit();
+  }
+});
+$("addBtn").addEventListener("click",function(){openForm(null);});
+$("swapBtn").addEventListener("click",function(){var d=$("swap");if(d.showModal)d.showModal();else d.setAttribute("open","");});
+$("swapClose").addEventListener("click",function(){var d=$("swap");if(d.close)d.close();else d.removeAttribute("open");});
+$("expBtn").addEventListener("click",exportCopy);
+$("impFile").addEventListener("change",function(){if(this.files&&this.files[0])importCopy(this.files[0]);this.value="";});
+$("form").addEventListener("submit",function(e){e.preventDefault();submit(false);});
+$("saveMoreBtn").addEventListener("click",function(){submit(true);});
+$("cancelBtn").addEventListener("click",closeForm);
+$("delBtn").addEventListener("click",function(){
+  if(!state.delArmed){state.delArmed=true;this.textContent="Tocca ancora per eliminare";return;}
+  if(state.readonly){toast("Non hai il permesso di modificare.");return;}
+  var id=state.editing;delGuest(id).then(function(){toast("Eliminato");closeForm();},failed);
+});
+window.addEventListener("hashchange",route);
+var drag=null,justDragged=false;
+document.addEventListener("pointerdown",function(e){
+  var el=e.target.closest&&e.target.closest(".tbl");if(!el)return;
+  drag={el:el,id:el.dataset.tbl,sx:e.clientX,sy:e.clientY,room:el.parentNode.getBoundingClientRect(),moved:false};
+  try{el.setPointerCapture(e.pointerId);}catch(_){}
+});
+document.addEventListener("pointermove",function(e){
+  if(!drag)return;var dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
+  if(!drag.moved&&dx*dx+dy*dy<64)return;drag.moved=true;
+  drag.x=Math.max(6,Math.min(94,(e.clientX-drag.room.left)/drag.room.width*100));
+  drag.y=Math.max(6,Math.min(94,(e.clientY-drag.room.top)/drag.room.height*100));
+  drag.el.style.left=drag.x+"%";drag.el.style.top=drag.y+"%";
+});
+function endDrag(){
+  if(!drag)return;var d=drag;drag=null;
+  if(d.moved){justDragged=true;setTimeout(function(){justDragged=false;},350);patchTable(d.id,{x:Math.round(d.x*10)/10,y:Math.round(d.y*10)/10});}
+}
+document.addEventListener("pointerup",endDrag);document.addEventListener("pointercancel",endDrag);
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-tbl],[data-newt],[data-tseat],[data-unseat],[data-tdel],[data-tclose]");if(!t)return;
+  if(t.dataset.tbl){if(justDragged)return;state.tEdit=t.dataset.tbl;state.tDelArmed=false;renderTableDlg();return;}
+  if(t.dataset.newt){addTable(t.dataset.newt);return;}
+  var cur=state.tables.filter(function(x){return x.id===state.tEdit;})[0];
+  if(t.dataset.tclose){state.tEdit=null;var d=$("tdlg");if(d.close)d.close();else d.removeAttribute("open");return;}
+  if(!cur)return;
+  if(t.dataset.tseat){state.tDelArmed=false;patchTable(cur.id,{seats:Math.max(1,Math.min(30,cur.seats+Number(t.dataset.tseat)))});return;}
+  if(t.dataset.unseat){state.tDelArmed=false;patchGuest(t.dataset.unseat,{table:""});return;}
+  if(t.dataset.tdel){
+    if(!state.tDelArmed){state.tDelArmed=true;renderTableDlg();return;}
+    state.tDelArmed=false;var name=cur.name;patchTable(cur.id,{deleted:true});toast(name+" eliminato");
+  }
+});
+document.addEventListener("change",function(e){
+  var t=e.target;if(!state.tEdit)return;
+  if(t.id==="t-name")patchTable(state.tEdit,{name:t.value.trim()||"Tavolo"});
+  else if(t.name==="tshape")patchTable(state.tEdit,{shape:t.value});
+  else if(t.id==="t-addg"&&t.value)patchGuest(t.value,{table:state.tEdit});
+});
+$("tdlg").addEventListener("close",function(){state.tEdit=null;});
+$("f-cat").innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.t)+'</option>';}).join("");
+
+/* ---------- avvio ---------- */
+try{var saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved)merge(saved);}catch(e){}
+merge(SEED);
+refresh();route();
+})();
+</script>
+</body>
+</html>
