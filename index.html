@@ -3,581 +3,789 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lista invitati nozze</title>
+<title>Marco e Miriam sposi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Josefin+Sans:wght@300;400;600&family=Reenie+Beanie&display=swap" rel="stylesheet">
 <style>
-/* Layout: una colonna da telefono, riepilogo in alto, tre viste (Guida, Lista, Inviti) con barra in basso. */
+/* Layout: una partecipazione disegnata a mano. Carta avorio, blu cobalto a tratto, senape, rosa e corallo; nomi in corsivo, testi spaziati, scheda ad arco e retro blu con cornice. */
 :root{
-  --bg:#FCFDFB; --surface:#FFFFFF; --ink:#26332B; --muted:#66746B; --line:#E7ECE3;
-  --accent:#5B8A3C; --accent-ink:#FFFFFF; --accent-soft:#F0F6E9;
-  --marco:#2B6C7C; --miriam:#A3426A; --both:#7A6A2E;
-  --ok:#2F7D4F; --warn:#B36B00; --no:#B23A3A;
-  --display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;
-  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:#f2efe9; --surface:#fbf9f4; --cobalt:#1f4a9c; --ink:#1b3c80; --soft:#4a639d; --faint:#7f90b8; --line:#d3dbec;
+  --mustard:#d9a521; --pink:#eeb4bf; --coral:#c64b3c;
+  --olive:var(--cobalt); --olive-deep:var(--cobalt); --leaf:#eef1f8; --passion:var(--coral); --sun:var(--mustard);
+  --glow:var(--mustard); --night:#fff; --sage:var(--cobalt); --bad:#c64b3c; --edge:var(--line);
+  --script:"Allura","Snell Roundhand","Brush Script MT",cursive;
+  --hand:"Reenie Beanie","Bradley Hand","Segoe Print",cursive;
+  --display:var(--script);
+  --body:"Josefin Sans","Century Gothic","Avenir Next",system-ui,sans-serif;
   color-scheme:light;
 }
 *{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
-button,input,select,textarea{font:inherit;color:inherit}
+html,body{margin:0;min-height:100%}
+body{font-family:var(--body);color:var(--ink);font-size:17px;line-height:1.6;background:var(--bg);-webkit-text-size-adjust:100%}
+.bg{display:none}
+a{color:inherit}
+button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.wrap{max-width:640px;margin:0 auto;padding:16px 16px 96px;display:flex;flex-direction:column;gap:16px}
-header.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-h1{font-family:var(--display);font-size:26px;line-height:1.1;margin:0;text-wrap:balance}
-h2{font-family:var(--display);font-size:19px;margin:0;text-wrap:balance}
-.sync{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.sync i{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
-.sync.on i{background:var(--ok)}
-.sync.off i{background:var(--no)}
-.banner{background:var(--accent-soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
-.banner.err{border-color:var(--no)}
-.summary{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
-.sum-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.big{font-family:var(--display);font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
-.big small{font-family:var(--body);font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}
-.target input::-webkit-outer-spin-button,.target input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.target{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.target input{width:92px;min-height:40px;font-size:16px;-moz-appearance:textfield;appearance:textfield;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);text-align:right;font-variant-numeric:tabular-nums}
-.split{display:flex;height:10px;border-radius:6px;overflow:hidden;background:var(--line)}
-.split span{display:block;height:100%}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.legend b{color:var(--ink);font-weight:600}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;font-weight:600;min-height:44px}
-.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn.danger{color:var(--no)}
-.btn.small{min-height:36px;padding:6px 12px;font-size:14px}
-.btn:disabled{opacity:.55;cursor:default}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
-.step-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
-.step-n{font-family:var(--display);color:var(--accent);font-size:15px}
-.step p{margin:0;color:var(--muted);font-size:14.5px}
-.counts{display:flex;flex-wrap:wrap;gap:6px}
-.pill{display:inline-flex;align-items:center;border-radius:999px;padding:2px 9px;font-size:12.5px;font-weight:600;border:1px solid currentColor;white-space:nowrap}
-.pill.marco{color:var(--marco)} .pill.miriam{color:var(--miriam)} .pill.both{color:var(--both)}
-.pill.sicuro{color:var(--ok)} .pill.probabile{color:var(--warn)} .pill.forse{color:var(--muted);border-style:dashed}
-.pill.zero{color:var(--muted);border-style:dashed;font-weight:500}
-.tools{display:flex;flex-direction:column;gap:10px}
-.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-height:44px}
-.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;white-space:nowrap;min-height:36px}
-.chip[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);font-weight:600}
-.group-title{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:6px 2px 0}
-.rows{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.row{display:flex;gap:10px;align-items:center;justify-content:space-between;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 14px;min-height:56px}
-.row:first-child{border-top:0}
-.row .name{font-weight:600;overflow-wrap:anywhere}
-.row .meta{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:3px}
-.row .n{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
-.row.inv{align-items:flex-start}
-.row.inv select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg);min-height:38px;max-width:150px}
-.st-da_inviare{border-left:4px solid var(--line)} .st-inviato{border-left:4px solid var(--warn)}
-.st-si{border-left:4px solid var(--ok)} .st-no{border-left:4px solid var(--no)}
-.missing{color:var(--warn);font-weight:600}
-.empty{color:var(--muted);text-align:center;padding:22px 12px;font-size:15px}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
-nav.tabs .in{display:flex;gap:4px;width:100%;max-width:640px;align-items:center}
-nav.tabs a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-weight:600;padding:10px 2px;border-radius:10px;font-size:14.5px}
-nav.tabs a[aria-current="page"]{color:var(--ink);background:var(--accent-soft)}
-nav.tabs .add{flex:0 0 auto;background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:10px 16px;font-weight:700;min-height:44px}
-dialog{border:0;padding:0;margin:auto auto 0;width:100%;max-width:640px;max-height:92%;background:var(--surface);color:var(--ink);border-radius:18px 18px 0 0}
-dialog::backdrop{background:rgba(40,55,45,.3)}
-form.sheet{display:flex;flex-direction:column;gap:14px;padding:18px 16px 20px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label,.field .lab{font-size:13.5px;font-weight:600;color:var(--muted)}
-.field input[type=text],.field input[type=tel],.field select,.field textarea{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-height:44px;width:100%}
-.seg{display:flex;gap:6px}
-.seg label{flex:1;position:relative}
-.seg input{position:absolute;opacity:0;inset:0}
-.seg span{display:block;text-align:center;border:1px solid var(--line);border-radius:10px;padding:10px 4px;font-weight:600;font-size:14.5px;color:var(--ink);background:var(--surface)}
-.seg input:checked+span{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
-.seg input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.stepper{display:flex;align-items:center;gap:8px}
-.stepper button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:20px;font-weight:700}
-.stepper output{min-width:28px;text-align:center;font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.actions .btn{flex:1}
-details.more summary{font-weight:600;color:var(--accent);padding:6px 0;cursor:pointer}
-details.more .inner{display:flex;flex-direction:column;gap:14px;padding-top:8px}
-.sheetbox{display:flex;flex-direction:column;gap:14px;padding:18px 16px 20px}
-.room{position:relative;aspect-ratio:4/5;background-color:var(--surface);background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:20px 20px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.tbl{position:absolute;transform:translate(-50%,-50%);touch-action:none;border:2px solid var(--accent);background:var(--accent-soft);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11.5px;line-height:1.15;padding:2px;cursor:grab;user-select:none;-webkit-user-select:none}
-.tbl.round{border-radius:50%} .tbl.square{border-radius:10px}
-.tbl.sposi{background:var(--accent);color:var(--accent-ink);font-size:13px}
-.tbl b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
-.tbl span{font-variant-numeric:tabular-nums}
-.tbl.full{border-color:var(--ok)} .tbl.over{border-color:var(--no);color:var(--no)}
-.hint{margin:0;color:var(--muted);font-size:14px}
-.seat{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
-.seat:first-child{border-top:0}
-.toast{position:fixed;left:16px;right:16px;bottom:84px;margin:0 auto;max-width:420px;background:var(--accent);color:var(--accent-ink);padding:10px 14px;border-radius:10px;font-size:14.5px;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+:focus-visible{outline:2px solid var(--mustard);outline-offset:3px}
+.wrap{max-width:760px;margin:0 auto;padding:14px 16px 40px;display:flex;flex-direction:column;gap:20px}
+.glass{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 30px -18px rgba(27,60,128,.35)}
+nav.top{position:sticky;top:10px;z-index:5;display:flex;align-items:center;gap:6px;padding:6px;border-radius:999px;background:rgba(251,249,244,.96)}
+nav.top .mono{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--cobalt);color:#fff;display:grid;place-items:center;font-family:var(--script);font-size:20px;line-height:1;padding-top:3px}
+nav.top .tabs{display:flex;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+nav.top .tabs::-webkit-scrollbar{display:none}
+nav.top button{background:none;border:0;border-radius:999px;padding:10px 12px 7px;font-size:13.5px;font-weight:400;letter-spacing:.1em;text-transform:lowercase;color:var(--soft);white-space:nowrap;flex:0 0 auto}
+nav.top button:hover{background:var(--leaf)}
+nav.top button[aria-current="page"]{background:var(--cobalt);color:#fff}
+.page{display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-family:var(--hand);font-size:26px;line-height:1;color:var(--cobalt);transform:rotate(-2deg);align-self:flex-start}
+h1,h2{font-family:var(--script);font-weight:400;line-height:1;margin:0;text-wrap:balance;color:var(--cobalt)}
+h1{font-size:clamp(64px,19vw,116px)}
+h2{font-size:clamp(42px,10vw,58px)}
+h3{font-family:var(--body);font-weight:600;font-size:17px;letter-spacing:.14em;text-transform:lowercase;line-height:1.3;margin:0;color:var(--cobalt)}
+p{margin:0}
+.lead{color:var(--soft);font-size:17px;max-width:56ch;white-space:pre-line}
+.hero{position:relative;overflow:hidden;padding:64px 22px 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;border-radius:min(50vw,380px) min(50vw,380px) 22px 22px}
+.hero .eyebrow{align-self:center;font-size:34px}
+.hero .lead{letter-spacing:.04em}
+.hero .when{justify-content:center}
+.hero .scene{margin:10px -22px 0;width:calc(100% + 44px)}
+.hero.photo{background-size:cover;background-position:center;min-height:520px;justify-content:flex-end;padding-bottom:28px;color:#fff}
+.hero.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,40,90,.05),rgba(20,40,90,.8))}
+.hero.photo h1,.hero.photo .lead,.hero.photo .eyebrow{color:#fff}
+.hero.photo .chip{background:rgba(255,255,255,.94)}
+.hero.photo .scene{display:none}
+.hero>*{position:relative}
+.hero h1 em{font-style:normal;color:var(--mustard)}
+.scene{display:block;width:100%;height:auto}
+.scene.foot{max-width:520px;opacity:.95}
+.when{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--cobalt);border-radius:999px;padding:8px 14px 5px;font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:var(--cobalt);background:transparent}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--mustard);margin-top:-3px}
+.count{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.count div{padding:14px 4px 10px;text-align:center}
+.count b{display:block;font-size:32px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums;color:var(--cobalt)}
+.count span{font-size:11.5px;color:var(--faint);letter-spacing:.16em;text-transform:lowercase}
+/* retro blu con cornice */
+.fun,.wip{position:relative;background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+.fun::after,.wip::after{content:"";position:absolute;inset:9px;border:1.5px solid rgba(255,255,255,.85);border-radius:13px;box-shadow:inset 0 0 0 3px var(--cobalt),inset 0 0 0 4.5px rgba(255,255,255,.85);pointer-events:none}
+.fun>*,.wip>*{position:relative;z-index:1}
+.fun{padding:30px 28px;display:flex;flex-direction:column;gap:10px}
+.fun .eyebrow,.wip .eyebrow{color:var(--mustard)}
+.fun p{font-size:19px;line-height:1.5;letter-spacing:.03em}
+.wip{padding:34px 28px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.wip h2,.wip .lead{color:#fff}
+.wip .note{color:rgba(255,255,255,.78)}
+.wip .stamp{border:2px dashed var(--mustard);color:var(--mustard);border-radius:10px;padding:6px 12px 3px;letter-spacing:.16em;text-transform:lowercase;font-size:13px;transform:rotate(-3deg)}
+.bar{width:100%;height:14px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}
+.bar span{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--mustard) 0 10px,#e9c261 10px 20px);border-radius:999px}
+.answer{font-family:var(--hand);font-size:30px;line-height:1.1;min-height:1.2em;color:var(--mustard)}
+.btn{align-self:flex-start;background:transparent;border:1px solid var(--cobalt);border-radius:999px;padding:10px 16px 7px;font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:var(--cobalt)}
+.btn:hover{background:var(--leaf)}
+.btn.solid{background:var(--cobalt);color:#fff}
+.fun .btn,.wip .btn{background:#fff;border-color:#fff;color:var(--cobalt)}
+.doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.door{display:flex;flex-direction:column;gap:6px;text-align:left;padding:20px 18px;background:var(--surface);border:1px solid var(--line);border-radius:20px}
+.door:hover{border-color:var(--cobalt)}
+.door span{color:var(--soft);font-size:15.5px}
+.door b{font-family:var(--hand);font-size:24px;font-weight:400;line-height:1;color:var(--coral)}
+.head{padding:26px 22px;display:flex;flex-direction:column;gap:10px}
+.plain{padding:8px 4px 0;display:flex;flex-direction:column;gap:8px}
+.figures{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.figures div{padding:16px 8px 12px;text-align:center}
+.figures b{display:block;font-family:var(--script);font-weight:400;font-size:58px;line-height:1;color:var(--mustard)}
+.figures span{font-size:12.5px;letter-spacing:.12em;text-transform:lowercase;color:var(--soft)}
+.road{position:relative;display:flex;flex-direction:column;gap:12px;padding-left:26px}
+.road::before{content:"";position:absolute;left:8px;top:14px;bottom:14px;width:2px;background:repeating-linear-gradient(180deg,var(--cobalt) 0 5px,transparent 5px 11px);opacity:.45}
+.stop{position:relative;padding:18px 18px 16px;display:flex;flex-direction:column;gap:5px}
+.stop::before{content:"";position:absolute;left:-24px;top:24px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--cobalt)}
+.stop.last::before{background:var(--mustard);border-color:var(--mustard)}
+.stop .where,.tag{font-size:12px;letter-spacing:.16em;text-transform:lowercase;color:var(--coral)}
+.stop p,.cards p,.way p{color:var(--soft);font-size:16px;white-space:pre-line}
+.photo-in{width:100%;max-height:340px;object-fit:cover;border-radius:14px;margin-bottom:8px;display:block}
+.girls,.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.girls .glass,.cards .glass{padding:20px 18px 18px;display:flex;flex-direction:column;gap:6px}
+.girls .date{font-family:var(--script);font-size:42px;line-height:1;color:var(--mustard)}
+.timeline{display:flex;flex-direction:column;gap:10px}
+.moment{display:grid;grid-template-columns:54px 22px 1fr auto;align-items:center;gap:8px;width:100%;text-align:left;padding:17px 16px 14px;background:var(--surface);border:1px solid var(--line);border-radius:18px}
+.moment:hover{border-color:var(--cobalt)}
+.moment .t{font-size:15px;letter-spacing:.06em;color:var(--cobalt);font-variant-numeric:tabular-nums}
+.moment .d{width:12px;height:12px;border-radius:50%;border:2px solid var(--cobalt);background:var(--surface);justify-self:center;margin-top:-3px}
+.moment .n{font-weight:600;font-size:16px;letter-spacing:.12em;text-transform:lowercase;display:block;color:var(--cobalt)}
+.moment .s{display:block;font-size:14px;color:var(--faint)}
+.moment .more{display:block;font-size:15.5px;color:var(--soft);margin-top:8px;max-width:48ch;white-space:pre-line}
+.moment .more[hidden]{display:none}
+.moment .a{color:var(--faint);font-size:18px;transition:transform .2s}
+.moment[aria-expanded="true"] .a{transform:rotate(90deg)}
+.moment.done .d{background:var(--cobalt)}
+.moment.now{border-color:var(--cobalt);background:var(--leaf)}
+.moment.now .d{background:var(--mustard);border-color:var(--mustard);box-shadow:0 0 0 5px rgba(217,165,33,.2)}
+.pill{background:var(--mustard);color:#1b3c80;border-radius:999px;padding:6px 12px 3px;font-size:12.5px;letter-spacing:.12em;text-transform:lowercase}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:var(--cobalt);color:#fff;border:0;border-radius:16px;padding:17px 18px 14px;letter-spacing:.1em;text-transform:lowercase;font-size:15px;text-decoration:none}
+.cta.ghost{background:transparent;color:var(--cobalt);border:1px solid var(--cobalt)}
+.note{font-size:14px;color:var(--faint);letter-spacing:.03em}
+.ways{display:flex;flex-direction:column;gap:10px}
+.way{padding:18px;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.way svg{width:44px;height:44px;padding:10px;border-radius:50%;border:1px solid var(--cobalt);stroke:var(--cobalt);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.lock{padding:26px 22px;display:flex;flex-direction:column;gap:12px}
+.lock form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lock input{flex:1;min-width:180px;background:#fff;border:1px solid var(--cobalt);border-radius:14px;padding:13px 14px 10px;min-height:48px}
+.lock form .btn{align-self:center}
+.err{color:var(--bad);font-size:15px}
+footer{text-align:center;color:var(--faint);font-size:13px;letter-spacing:.14em;text-transform:lowercase;display:flex;flex-direction:column;gap:10px;align-items:center}
+.toast{position:fixed;left:16px;right:16px;bottom:18px;margin:0 auto;max-width:380px;background:var(--cobalt);color:#fff;padding:11px 14px 8px;border-radius:12px;text-align:center;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
 .toast.show{opacity:1}
-@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+/* editor */
+dialog#ed{border:0;padding:0;margin:0 0 0 auto;width:min(460px,100%);max-width:100%;height:100%;max-height:100%;background:#f7f5ef;color:#222b24;color-scheme:light}
+dialog#ed::backdrop{background:rgba(0,0,0,.35)}
+.ed-top{position:sticky;top:0;background:#f7f5ef;border-bottom:1px solid #d9d6cb;padding:12px 14px;display:flex;flex-direction:column;gap:8px;z-index:2}
+.ed-top h2{font-family:var(--body);font-size:18px;font-weight:700}
+.ed-row{display:flex;gap:6px;flex-wrap:wrap}
+.ed-b{background:#fff;border:1px solid #c9c5b8;border-radius:10px;padding:8px 12px;font-weight:600;font-size:14px;color:#222b24}
+.ed-b.go{background:#3d5a34;border-color:#3d5a34;color:#fff}
+.ed-b.del{color:#a33}
+#edBody{padding:10px 14px 40px;display:flex;flex-direction:column;gap:8px;font-size:14.5px}
+#edBody details{background:#fff;border:1px solid #d9d6cb;border-radius:12px;padding:0 12px}
+#edBody summary{font-weight:700;padding:12px 0;cursor:pointer}
+#edBody label{display:block;font-size:13px;font-weight:600;color:#56604f;margin:8px 0 3px}
+#edBody input[type=text],#edBody input[type=password],#edBody textarea{width:100%;border:1px solid #c9c5b8;border-radius:8px;padding:8px 10px;background:#fbfaf6;color:#222b24}
+#edBody textarea{min-height:76px;resize:vertical}
+#edBody fieldset{border:1px solid #d9d6cb;border-radius:10px;margin:8px 0;padding:6px 10px 10px}
+#edBody legend{font-size:12.5px;font-weight:700;color:#56604f;padding:0 4px}
+#edBody .thumb{max-width:120px;max-height:80px;border-radius:6px;display:block;margin:4px 0}
+#edBody .help{font-size:13px;color:#56604f;margin:6px 0 10px}
+@media (max-width:600px){nav.top{border-radius:24px;align-items:flex-start}nav.top .tabs{flex-wrap:wrap;overflow:visible;row-gap:2px}nav.top button{padding:8px 11px;font-size:13.5px}}
+@media (max-width:420px){.moment{grid-template-columns:50px 22px 1fr auto;padding:14px 12px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <h1>Lista invitati</h1>
-    <button class="btn small" type="button" id="swapBtn">Scambia lista</button>
-  </header>
-  <div id="banner" hidden class="banner"></div>
-  <section class="summary" id="summary" aria-label="Riepilogo"></section>
-  <main id="view"></main>
+<div class="bg" aria-hidden="true">
+  <i style="width:70px;height:70px;left:18%;top:9%"></i><i style="width:46px;height:46px;left:30%;top:13%"></i>
+  <i style="width:90px;height:90px;right:8%;top:58%"></i><i style="width:54px;height:54px;right:22%;top:70%"></i>
+  <i style="width:40px;height:40px;left:8%;top:62%"></i>
 </div>
-
-<nav class="tabs" aria-label="Sezioni">
-  <div class="in">
-    <a href="#guida" data-tab="guida">Guida</a>
-    <a href="#lista" data-tab="lista">Lista</a>
-    <a href="#inviti" data-tab="inviti">Inviti</a>
-    <a href="#tavoli" data-tab="tavoli">Tavoli</a>
-    <button class="add" type="button" id="addBtn" aria-label="Aggiungi invito">+ Invito</button>
+<div class="wrap" id="app"></div>
+<dialog id="ed" aria-label="Modifica il sito">
+  <div class="ed-top">
+    <h2>Modifica il sito</h2>
+    <div class="ed-row">
+      <button type="button" class="ed-b go" id="edDown">Scarica il sito aggiornato</button>
+      <button type="button" class="ed-b" id="edCopy">Copia il codice</button>
+      <button type="button" class="ed-b" id="edClose">Chiudi</button>
+    </div>
   </div>
-</nav>
-
-<dialog id="dlg" aria-labelledby="dlgTitle">
-  <form class="sheet" id="form" novalidate>
-    <h2 id="dlgTitle">Nuovo invito</h2>
-    <div class="field">
-      <label for="f-name">Nome della persona o del nucleo</label>
-      <input type="text" id="f-name" autocomplete="off" placeholder="Es. Zio Franco e zia Rosa" maxlength="120">
-    </div>
-    <div class="field">
-      <span class="lab">Da parte di</span>
-      <div class="seg" role="radiogroup" aria-label="Da parte di">
-        <label><input type="radio" name="side" id="f-side-marco" value="marco"><span>Marco</span></label>
-        <label><input type="radio" name="side" id="f-side-miriam" value="miriam"><span>Miriam</span></label>
-        <label><input type="radio" name="side" id="f-side-both" value="both"><span>Entrambi</span></label>
-      </div>
-    </div>
-    <div class="field">
-      <label for="f-cat">Categoria</label>
-      <select id="f-cat"></select>
-    </div>
-    <div class="two">
-      <div class="field"><span class="lab">Adulti</span>
-        <div class="stepper"><button type="button" data-step="adults" data-d="-1" aria-label="Un adulto in meno">−</button><output id="f-adults">2</output><button type="button" data-step="adults" data-d="1" aria-label="Un adulto in più">+</button></div></div>
-      <div class="field"><span class="lab">Bambini</span>
-        <div class="stepper"><button type="button" data-step="kids" data-d="-1" aria-label="Un bambino in meno">−</button><output id="f-kids">0</output><button type="button" data-step="kids" data-d="1" aria-label="Un bambino in più">+</button></div></div>
-    </div>
-    <div class="field">
-      <span class="lab">Quanto siete sicuri di invitarli</span>
-      <div class="seg" role="radiogroup" aria-label="Certezza">
-        <label><input type="radio" name="sure" id="f-sure-sicuro" value="sicuro"><span>Sicuro</span></label>
-        <label><input type="radio" name="sure" id="f-sure-probabile" value="probabile"><span>Probabile</span></label>
-        <label><input type="radio" name="sure" id="f-sure-forse" value="forse"><span>Forse</span></label>
-      </div>
-    </div>
-    <details class="more" id="f-more">
-      <summary>Dati per l'invito (potete compilarli dopo)</summary>
-      <div class="inner">
-        <div class="field">
-          <label for="f-mode">Come arriva l'invito</label>
-          <select id="f-mode">
-            <option value="">Da decidere</option>
-            <option value="cartaceo">Partecipazione cartacea per posta</option>
-            <option value="mano">Partecipazione consegnata a mano</option>
-            <option value="whatsapp">Messaggio WhatsApp</option>
-          </select>
-        </div>
-        <div class="field"><label for="f-phone">Telefono</label><input type="tel" id="f-phone" autocomplete="off" maxlength="40"></div>
-        <div class="field"><label for="f-addr">Indirizzo</label><textarea id="f-addr" rows="2" maxlength="300"></textarea></div>
-        <div class="field"><label for="f-notes">Note</label><textarea id="f-notes" rows="2" maxlength="500" placeholder="Es. vegetariana, viene da fuori, serve il seggiolone"></textarea></div>
-      </div>
-    </details>
-    <div class="actions">
-      <button class="btn primary" type="submit" id="saveBtn">Salva</button>
-      <button class="btn" type="button" id="saveMoreBtn">Salva e aggiungi un altro</button>
-    </div>
-    <div class="actions">
-      <button class="btn" type="button" id="cancelBtn">Annulla</button>
-      <button class="btn danger" type="button" id="delBtn" hidden>Elimina</button>
-    </div>
-  </form>
-</dialog>
-<dialog id="tdlg" aria-label="Tavolo"><div class="sheetbox" id="tdlgBody"></div></dialog>
-<dialog id="swap" aria-labelledby="swapTitle">
-  <div class="sheet" style="display:flex;flex-direction:column;gap:14px;padding:18px 16px 20px">
-    <h2 id="swapTitle">Scambia la lista tra i telefoni</h2>
-    <p style="margin:0;color:var(--muted);font-size:14.5px">La lista è salvata su questo telefono. Per allinearvi, uno invia la propria copia (per esempio su WhatsApp) e l'altro la carica qui: le due liste vengono unite e, per ogni voce, vale la modifica più recente. La copia inviata fa anche da salvataggio di sicurezza.</p>
-    <button class="btn primary" type="button" id="expBtn">Invia la mia copia</button>
-    <label class="btn" for="impFile" style="text-align:center;display:flex;align-items:center;justify-content:center">Carica una copia ricevuta</label>
-    <input type="file" id="impFile" accept=".txt,.json,text/plain,application/json" style="position:absolute;width:1px;height:1px;opacity:0">
-    <button class="btn" type="button" id="swapClose">Chiudi</button>
-  </div>
+  <div id="edBody"></div>
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- CONTENUTI DEL SITO: si modificano dal pannello "Modifica il sito" (aprite questo file sul computer) -->
+<script type="application/json" id="content">
+{
+ "sposi": [
+  "Marco",
+  "Miriam"
+ ],
+ "data": "2027-06-13",
+ "oraCerimonia": "18:00",
+ "luogo": "Masseria Traetta · Ostuni",
+ "mappa": "https://www.google.com/maps/search/?api=1&query=Masseria+Traetta+Strada+per+Ceglie+Messapica+Ostuni",
+ "sitoMasseria": "https://www.masseriatraetta.com/",
+ "orariProvvisori": true,
+ "home": {
+  "eyebrow": "ci sposiamo!",
+  "lead": "Dopo sette traslochi, due bambine e parecchi chilometri tra la Puglia, Milano e Bologna, ci fermiamo un attimo per dirci di sì.\nVi vogliamo tutti, grandi e piccini: sarà una festa tra gli ulivi, con i sapori di casa e la musica fino a tardi.",
+  "cover": "",
+  "funTitolo": "lo sapevate?",
+  "curiosita": [
+   {
+    "testo": "Abbiamo traslocato sette volte prima di sposarci. Organizzare un matrimonio, a confronto, è una passeggiata. Più o meno."
+   },
+   {
+    "testo": "Le bambine hanno già scelto il menù: pasta in bianco e torta. Stiamo trattando."
+   },
+   {
+    "testo": "Lo sposo ha promesso di ballare. È scritto qui, quindi adesso vale."
+   },
+   {
+    "testo": "Sappiamo montare un armadio in quattro città diverse. La scaletta degli interventi, invece, è ancora in bozza."
+   },
+   {
+    "testo": "Ci siamo conosciuti a Barletta. Tutto il resto è stato un lungo giro per arrivare a Ostuni."
+   },
+   {
+    "testo": "Il dj accetta richieste. Lo sposo, sulla scaletta, un po' meno."
+   },
+   {
+    "testo": "In Valle d'Itria i trulli hanno il tetto a punta. Dopo il dj set, anche qualche invitato."
+   }
+  ],
+  "festaTitolo": "Una festa per tutti",
+  "festaLead": "Non una cerimonia da guardare, ma una giornata da vivere insieme. Dal più piccolo al più grande, ognuno ha il suo posto.",
+  "festa": [
+   {
+    "tag": "Sapori di Puglia",
+    "titolo": "A tavola con calma",
+    "testo": "I sapori sono quelli di casa nostra, quelli che in Puglia si preparano senza fretta e si mangiano in compagnia."
+   },
+   {
+    "tag": "Ulivi e trulli",
+    "titolo": "Con l'erba sotto i piedi",
+    "testo": "Una masseria tra gli ulivi, con i trulli della Valle d'Itria a due passi. Consiglio pratico: scarpe che vanno d'accordo con il prato."
+   },
+   {
+    "tag": "Dj set",
+    "titolo": "Si balla, tutti",
+    "testo": "Dopo la torta parte il dj set. Diteci la canzone che vi fa alzare dalla sedia e la facciamo arrivare in consolle."
+   },
+   {
+    "tag": "Grandi e piccini",
+    "titolo": "Nessuno escluso",
+    "testo": "I bambini sono invitati quanto i nonni. È la festa di chi ci vuole bene, a qualunque età."
+   },
+   {
+    "tag": "Passione",
+    "titolo": "Il motivo di tutto",
+    "testo": "In mezzo a ulivi, musica e buon cibo c'è una cosa semplice: ci amiamo, e vogliamo dirlo davanti a voi."
+   }
+  ]
+ },
+ "storia": {
+  "titolo": "Puglia, Milano, Bologna, andata e ritorno",
+  "lead": "Ci piace pensare che una coppia si misuri anche dagli scatoloni che ha riempito insieme. I nostri sono stati tanti.",
+  "numeri": [
+   {
+    "n": "7",
+    "l": "traslochi"
+   },
+   {
+    "n": "2",
+    "l": "bambine"
+   },
+   {
+    "n": "1",
+    "l": "sì, finalmente"
+   }
+  ],
+  "tappe": [
+   {
+    "dove": "Barletta",
+    "titolo": "L'incontro",
+    "testo": "Ci siamo incontrati a Barletta. Da lì parte ogni cosa.",
+    "img": ""
+   },
+   {
+    "dove": "Milano e Andria",
+    "titolo": "Le strade del lavoro",
+    "testo": "Nel nostro percorso ci sono anche Milano, dove ha lavorato lo sposo, e Andria, dove ha lavorato la sposa.",
+    "img": ""
+   },
+   {
+    "dove": "Trasloco n. 1 · Puglia → Bologna",
+    "titolo": "Si parte per Bologna",
+    "testo": "Il primo camion carico, direzione nord. Portici, tortellini e una vita nuova da costruire in due.",
+    "img": ""
+   },
+   {
+    "dove": "Traslochi n. 2 e 3 · Bologna e Pianoro",
+    "titolo": "Due case in Emilia",
+    "testo": "A Bologna abbiamo cambiato casa altre due volte, e una ci ha portati fuori città, a Pianoro, in provincia.",
+    "img": ""
+   },
+   {
+    "dove": "Trasloco n. 4 · Bologna → Puglia",
+    "titolo": "Il ritorno",
+    "testo": "A un certo punto il mare ha chiamato. Ennesimo trasloco, questa volta verso sud, verso casa.",
+    "img": ""
+   },
+   {
+    "dove": "Traslochi n. 5 e 6 · Puglia",
+    "titolo": "Ancora due indirizzi",
+    "testo": "Anche in Puglia non siamo stati fermi: altre due case, altre due volte tutto negli scatoloni.",
+    "img": ""
+   },
+   {
+    "dove": "Trasloco n. 7 · Casa nostra",
+    "titolo": "La casa nuova",
+    "testo": "L'ultima l'abbiamo comprata da poco, ed è nostra. Gli scatoloni, questa volta, li buttiamo via.",
+    "img": ""
+   },
+   {
+    "dove": "Prossima tappa · Ostuni",
+    "titolo": "Il matrimonio",
+    "testo": "Manca solo una cosa da fare insieme, e vogliamo farla con voi.",
+    "img": ""
+   }
+  ],
+  "famEyebrow": "E nel frattempo",
+  "famTitolo": "Siamo diventati quattro",
+  "famLead": "Tra uno scatolone e l'altro sono arrivate loro, e ogni casa è diventata più piccola e più bella.",
+  "bambine": [
+   {
+    "quando": "Febbraio 2021",
+    "testo": "Arriva la nostra prima bambina, e niente è più come prima.",
+    "img": ""
+   },
+   {
+    "quando": "Gennaio 2024",
+    "testo": "Arriva la seconda, e la famiglia è al completo.",
+    "img": ""
+   }
+  ]
+ },
+ "giorno": {
+  "titolo": "Il giorno del matrimonio",
+  "lead": "Una giornata da passare insieme, momento per momento, dal sì fino all'ultimo ballo.",
+  "nota": "Vi aspettiamo dalle 17:30, la cerimonia è alle 18:00. Gli orari della serata sono ancora provvisori: li confermeremo qui.",
+  "programma": [
+   {
+    "ora": "17:30",
+    "titolo": "Arrivo degli ospiti",
+    "dove": "Masseria Traetta",
+    "testo": "Vi aspettiamo con qualcosa di fresco. Arrivate con calma: c'è tempo per salutare tutti."
+   },
+   {
+    "ora": "18:00",
+    "titolo": "Cerimonia",
+    "dove": "Rito civile · Masseria Traetta",
+    "testo": "Il momento del sì. Vi chiediamo solo di tenere i telefoni in tasca: alle foto pensa il fotografo."
+   },
+   {
+    "ora": "19:00",
+    "titolo": "Brindisi e foto",
+    "dove": "Corte della masseria",
+    "testo": "Bollicine, antipasti e foto di gruppo, mentre il sole scende."
+   },
+   {
+    "ora": "20:30",
+    "titolo": "Cena",
+    "dove": "Masseria Traetta",
+    "testo": "A tavola, con i sapori di casa nostra."
+   },
+   {
+    "ora": "23:00",
+    "titolo": "Primo ballo",
+    "dove": "Pista da ballo",
+    "testo": "Apriamo le danze noi, poi tocca a voi."
+   },
+   {
+    "ora": "23:30",
+    "titolo": "Torta e dj set",
+    "dove": "Corte della masseria",
+    "testo": "Taglio della torta, confetti e poi dj set: si balla tutti, dai nipoti ai nonni."
+   }
+  ]
+ },
+ "ospiti": {
+  "titolo": "Ostuni e la masseria",
+  "lead": "Ci sposiamo a Masseria Traetta, nella campagna di Ostuni: la città bianca, tra gli ulivi, alle porte della Valle d'Itria e a pochi chilometri dall'Adriatico. Qui trovate come raggiungerci e qualche idea per restare un giorno in più.",
+  "indirizzo": "Masseria Traetta Exclusive · Strada per Ceglie Messapica km 2,500 · 72017 Ostuni (BR)",
+  "modi": [
+   {
+    "icona": "aereo",
+    "titolo": "In aereo",
+    "testo": "L'aeroporto più comodo è Brindisi (BDS), a circa 35 km da Ostuni: mezz'ora abbondante di auto. In alternativa c'è Bari (BRI), a un centinaio di chilometri, circa un'ora e mezza.\nDa entrambi: auto a noleggio, taxi o transfer prenotato. Da Bari anche il treno."
+   },
+   {
+    "icona": "treno",
+    "titolo": "In treno",
+    "testo": "La stazione di Ostuni è sulla linea adriatica Bari–Lecce: da Bari ci vuole poco più di un'ora.\nLa stazione è fuori città, a circa 2,5 km dal centro: c'è un bus navetta, oppure il taxi. Per la masseria serve comunque un'auto o un taxi."
+   },
+   {
+    "icona": "auto",
+    "titolo": "In auto",
+    "testo": "Da nord si scende lungo l'A14 fino a Bari e si prosegue sulla superstrada SS16/SS379 verso Brindisi, uscita Ostuni. Da Lecce e dal Salento si risale la stessa superstrada.\nLa masseria è appena fuori Ostuni, sulla strada per Ceglie Messapica, al km 2,5."
+   },
+   {
+    "icona": "taxi",
+    "titolo": "Taxi, transfer e navette",
+    "testo": "Chi non guida può prenotare un transfer privato dall'aeroporto o dalla stazione. Se dopo la festa preferite non mettervi al volante, ditecelo: proviamo a organizzare i rientri insieme."
+   }
+  ],
+  "cose": [
+   {
+    "tag": "In città",
+    "titolo": "Ostuni, la città bianca",
+    "testo": "Il centro storico imbiancato a calce, i vicoli in salita, la Cattedrale e Piazza della Libertà con la colonna di Sant'Oronzo. Al tramonto è il momento migliore.",
+    "img": ""
+   },
+   {
+    "tag": "Mare · 10–25 min",
+    "titolo": "Le spiagge",
+    "testo": "Rosa Marina, Pilone, Costa Merlata e Torre Pozzelle sono le più vicine. Poco più a sud c'è la riserva di Torre Guaceto, con dune e mare trasparente.",
+    "img": ""
+   },
+   {
+    "tag": "Valle d'Itria · 20–40 min",
+    "titolo": "Trulli e borghi",
+    "testo": "Cisternino per una cena di carne alla brace, Locorotondo e Martina Franca per una passeggiata, Alberobello per i trulli patrimonio UNESCO.",
+    "img": ""
+   },
+   {
+    "tag": "Campagna",
+    "titolo": "Ulivi secolari",
+    "testo": "La piana tra Ostuni e il mare è un bosco di ulivi monumentali: si visita a piedi o in bici, anche nel Parco delle Dune Costiere, e nei frantoi si assaggia l'olio.",
+    "img": ""
+   },
+   {
+    "tag": "Gita · 45–60 min",
+    "titolo": "Un po' più in là",
+    "testo": "Polignano a Mare e Monopoli sulla costa, le Grotte di Castellana nell'entroterra, Lecce e il suo barocco verso sud.",
+    "img": ""
+   },
+   {
+    "tag": "A tavola",
+    "titolo": "Da assaggiare",
+    "testo": "Orecchiette, burrata, friselle, bombette alla brace, taralli e un bicchiere di Primitivo o di Negroamaro. Il pasticciotto a colazione non è facoltativo.",
+    "img": ""
+   }
+  ],
+  "nota": "Tempi e distanze sono indicativi, in auto da Ostuni."
+ },
+ "sposati": {
+  "inizio": "2026-11-15",
+  "primaTitolo": "Non ancora.",
+  "primaTesto": "Questa pagina racconterà com'è andata. Per ora gli sposi stanno ancora scegliendo i confetti, provando le scarpe e litigando con la lista degli invitati.\nTornate dopo il sì: ci saranno foto, ringraziamenti e qualche lacrima.",
+  "frasi": [
+   {
+    "testo": "Ancora no. Abbiamo appena controllato."
+   },
+   {
+    "testo": "No. Ma la sposa ha già detto sì al vestito."
+   },
+   {
+    "testo": "Non ancora. Lo sposo sta ripassando la risposta: è una sola parola, ce la può fare."
+   },
+   {
+    "testo": "Pazienza. Anche i taralli vogliono il loro tempo."
+   },
+   {
+    "testo": "No, e continuare a premere non accelera le cose. Ci abbiamo provato."
+   }
+  ],
+  "dopoTitolo": "Sì, siamo sposati!",
+  "dopoTesto": "È successo davvero. Grazie a chi c'era, a chi ci ha pensato da lontano e a chi ha ballato fino all'ultimo. Presto qui le foto."
+ },
+ "privata": {
+  "titolo": "Area riservata",
+  "lead": "Questa parte è solo per i nostri invitati. Inserite la password che trovate sull'invito.",
+  "vuota": "L'area riservata è ancora in preparazione. Torna a trovarci tra un po'.",
+  "cipher": null
+ }
+}
+</script>
 
 <script>
 (function(){
 "use strict";
-var SIDES={marco:"Marco",miriam:"Miriam",both:"Entrambi"};
-var SURE={sicuro:"Sicuro",probabile:"Probabile",forse:"Forse"};
-var STATUS={da_inviare:"Da inviare",inviato:"Inviato",si:"Viene",no:"Non viene"};
-var MODES={"":"Da decidere",cartaceo:"Cartaceo per posta",mano:"Cartaceo a mano",whatsapp:"WhatsApp"};
-var CATS=[
- {id:"famiglia",t:"Famiglia stretta",q:"Genitori, fratelli e sorelle con le loro famiglie, nonni."},
- {id:"parenti",t:"Zii e cugini",q:"Procedete un ramo alla volta: prima il lato materno, poi il paterno. Zii, cugini, prozii."},
- {id:"testimoni",t:"Testimoni e amici più cari",q:"Le persone che non possono mancare per nessun motivo."},
- {id:"amici",t:"Amici",q:"Scuola, università, comitiva, sport, amici che vivono lontano. Scorrete la rubrica e le chat."},
- {id:"colleghi",t:"Colleghi",q:"Colleghi di oggi e di ieri. Decidete una regola uguale per tutti e due."},
- {id:"famiglie",t:"Amici di famiglia e vicini",q:"Gli invitati che stanno a cuore ai vostri genitori: chiedete a loro un elenco."},
- {id:"altri",t:"Altri",q:"Celebrante, padrini e madrine, chi vi ha invitato al proprio matrimonio."}
-];
-var CATNAME={}; CATS.forEach(function(c){CATNAME[c.id]=c.t;});
-
-var state={guests:[],target:0,tab:"guida",q:"",fSide:"",fSure:"",loaded:false,readonly:false,editing:null,delArmed:false};
-var KEY="nozze-lista-v1";state.all=[];state.targetAt=0;state.tablesAll=[];state.tables=[];state.tEdit=null;state.tDelArmed=false;
-var SEED={"guests":[{"id":"xp-002","name":"(1) Mamma Raffaella","side":"miriam","cat":"famiglia","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129149,"updatedAt":1794756129147},{"id":"xp-003","name":"(1) Papà Ettore","side":"miriam","cat":"famiglia","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129150,"updatedAt":1794756129147},{"id":"xp-004","name":"(1) Anna","side":"miriam","cat":"famiglia","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129151,"updatedAt":1794756129147},{"id":"xp-005","name":"(2) Ilaria","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129152,"updatedAt":1794756129147},{"id":"xp-006","name":"(2) Mimmo","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129153,"updatedAt":1794756129147},{"id":"xp-007","name":"(3) Zio Salvatore","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129154,"updatedAt":1794756129147},{"id":"xp-008","name":"(3) Zia Carmela","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129155,"updatedAt":1794756129147},{"id":"xp-009","name":"(3) Martina","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129156,"updatedAt":1794756129147},{"id":"xp-010","name":"(3) Simone","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129157,"updatedAt":1794756129147},{"id":"xp-011","name":"(3) Cristian","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129158,"updatedAt":1794756129147},{"id":"xp-012","name":"(3) Nonna Anna","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129159,"updatedAt":1794756129147},{"id":"xp-013","name":"(4) Aldo","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129160,"updatedAt":1794756129147},{"id":"xp-014","name":"(4) Marika","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129161,"updatedAt":1794756129147},{"id":"xp-015","name":"(5) Zia Maria","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129162,"updatedAt":1794756129147},{"id":"xp-016","name":"(6) Zio Franco","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129163,"updatedAt":1794756129147},{"id":"xp-017","name":"(6) Zia Pina","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129164,"updatedAt":1794756129147},{"id":"xp-018","name":"(7) Mimmo","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129165,"updatedAt":1794756129147},{"id":"xp-019","name":"(7) Filly","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129166,"updatedAt":1794756129147},{"id":"xp-020","name":"(7) Alessandro","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129167,"updatedAt":1794756129147},{"id":"xp-021","name":"(8-9) Zio Nico","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129168,"updatedAt":1794756129147},{"id":"xp-022","name":"(8-9) Ivan","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129169,"updatedAt":1794756129147},{"id":"xp-023","name":"(8-9) Moglie Ivan","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129170,"updatedAt":1794756129147},{"id":"xp-024","name":"(8-9) Marika","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129171,"updatedAt":1794756129147},{"id":"xp-025","name":"(10) Zio Tiziano","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129172,"updatedAt":1794756129147},{"id":"xp-026","name":"(10) Zia Sonia","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129173,"updatedAt":1794756129147},{"id":"xp-027","name":"(10) Figlio di zio Tiziano e zia Sonia","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129174,"updatedAt":1794756129147},{"id":"xp-028","name":"(10) Figlia di zio Tiziano e zia Sonia","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129175,"updatedAt":1794756129147},{"id":"xp-029","name":"(11) Zia Marcella","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129176,"updatedAt":1794756129147},{"id":"xp-030","name":"(12) Zia Ketty","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129177,"updatedAt":1794756129147},{"id":"xp-031","name":"(12) Roberta","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129178,"updatedAt":1794756129147},{"id":"xp-032","name":"(12) Andrea","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129179,"updatedAt":1794756129147},{"id":"xp-033","name":"(12) Giulia","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129180,"updatedAt":1794756129147},{"id":"xp-034","name":"(13) Zia Maria","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129181,"updatedAt":1794756129147},{"id":"xp-035","name":"(13) Perfetto","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"ma chi è ??","table":"","status":"da_inviare","createdAt":1794756129182,"updatedAt":1794756129147},{"id":"xp-036","name":"(14) Mimma","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129183,"updatedAt":1794756129147},{"id":"xp-037","name":"(14) Rodolfo","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129184,"updatedAt":1794756129147},{"id":"xp-038","name":"(15) Marilena","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Bologna","table":"","status":"da_inviare","createdAt":1794756129185,"updatedAt":1794756129147},{"id":"xp-039","name":"(15) Marito di Marilena","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Bologna","table":"","status":"da_inviare","createdAt":1794756129186,"updatedAt":1794756129147},{"id":"xp-040","name":"(16) Cristina","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Bologna","table":"","status":"da_inviare","createdAt":1794756129187,"updatedAt":1794756129147},{"id":"xp-041","name":"(16) Angelo","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Bologna","table":"","status":"da_inviare","createdAt":1794756129188,"updatedAt":1794756129147},{"id":"xp-042","name":"(17) Vivian","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Gallipoli","table":"","status":"da_inviare","createdAt":1794756129189,"updatedAt":1794756129147},{"id":"xp-043","name":"(18) Lucia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129190,"updatedAt":1794756129147},{"id":"xp-044","name":"(19) Flavia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129191,"updatedAt":1794756129147},{"id":"xp-045","name":"(20) Benny","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129192,"updatedAt":1794756129147},{"id":"xp-046","name":"(21) Rosy","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129193,"updatedAt":1794756129147},{"id":"xp-047","name":"(22) Claudia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129194,"updatedAt":1794756129147},{"id":"xp-048","name":"(23) Mariagrazia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129195,"updatedAt":1794756129147},{"id":"xp-049","name":"(24) Ester","side":"both","cat":"amici","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov) · Sul foglio: '?'","table":"","status":"da_inviare","createdAt":1794756129196,"updatedAt":1794756129147},{"id":"xp-050","name":"(25) Simona","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129197,"updatedAt":1794756129147},{"id":"xp-051","name":"(26) Lovi","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129198,"updatedAt":1794756129147},{"id":"xp-052","name":"(26) Nico","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129199,"updatedAt":1794756129147},{"id":"xp-053","name":"(27) Mary","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129200,"updatedAt":1794756129147},{"id":"xp-054","name":"(27) Valerio","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129201,"updatedAt":1794756129147},{"id":"xp-055","name":"(28) Chiara","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129202,"updatedAt":1794756129147},{"id":"xp-056","name":"(28) Andrea","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129203,"updatedAt":1794756129147},{"id":"xp-057","name":"(29) Fabio","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Taranto (prov)","table":"","status":"da_inviare","createdAt":1794756129204,"updatedAt":1794756129147},{"id":"xp-058","name":"(30) Michele","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129205,"updatedAt":1794756129147},{"id":"xp-059","name":"(30) Pina","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129206,"updatedAt":1794756129147},{"id":"xp-060","name":"(31) Bubu","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129207,"updatedAt":1794756129147},{"id":"xp-061","name":"(31) Moglie di Bubu","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129208,"updatedAt":1794756129147},{"id":"xp-062","name":"(32) Annalisa","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129209,"updatedAt":1794756129147},{"id":"xp-063","name":"(32) Marco","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129210,"updatedAt":1794756129147},{"id":"xp-064","name":"(33) Cosimo","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129211,"updatedAt":1794756129147},{"id":"xp-065","name":"(33) Irene","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129212,"updatedAt":1794756129147},{"id":"xp-066","name":"(34) Lucia","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129213,"updatedAt":1794756129147},{"id":"xp-067","name":"(34) Antonello","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129214,"updatedAt":1794756129147},{"id":"xp-068","name":"(35) Carlo","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129215,"updatedAt":1794756129147},{"id":"xp-069","name":"(35) Anna","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Milano","table":"","status":"da_inviare","createdAt":1794756129216,"updatedAt":1794756129147},{"id":"xp-070","name":"(36) Mariano","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Barletta","table":"","status":"da_inviare","createdAt":1794756129217,"updatedAt":1794756129147},{"id":"xp-071","name":"(36) Nata","side":"both","cat":"amici","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Amici Barletta","table":"","status":"da_inviare","createdAt":1794756129218,"updatedAt":1794756129147},{"id":"xp-072","name":"(37) Rocco","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129219,"updatedAt":1794756129147},{"id":"xp-073","name":"(37) Patrizia","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129220,"updatedAt":1794756129147},{"id":"xp-074","name":"(37) Marilena","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129221,"updatedAt":1794756129147},{"id":"xp-075","name":"(37) Francesca","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129222,"updatedAt":1794756129147},{"id":"xp-076","name":"(38) Lena","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Sopra c'era 'RAOL', cancellato","table":"","status":"da_inviare","createdAt":1794756129223,"updatedAt":1794756129147},{"id":"xp-077","name":"(38) Pino","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129224,"updatedAt":1794756129147},{"id":"xp-078","name":"(39) Ale","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129225,"updatedAt":1794756129147},{"id":"xp-079","name":"(39) Pamela","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129226,"updatedAt":1794756129147},{"id":"xp-080","name":"(40) Luciana","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129227,"updatedAt":1794756129147},{"id":"xp-081","name":"(40) Dario","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129228,"updatedAt":1794756129147},{"id":"xp-082","name":"(41) Annamaria","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129229,"updatedAt":1794756129147},{"id":"xp-083","name":"(41) Francesco","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129230,"updatedAt":1794756129147},{"id":"xp-084","name":"(44) Ciccio Marang.","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Cognome abbreviato sul foglio","table":"","status":"da_inviare","createdAt":1794756129231,"updatedAt":1794756129147},{"id":"xp-085","name":"(44) Moglie di Ciccio","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129232,"updatedAt":1794756129147},{"id":"xp-086","name":"(45) Tommaso","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129233,"updatedAt":1794756129147},{"id":"xp-087","name":"(45) Compagna di Tommaso","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129234,"updatedAt":1794756129147},{"id":"xp-088","name":"(46) Gaetano","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129235,"updatedAt":1794756129147},{"id":"xp-089","name":"(46) Patrizia","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129236,"updatedAt":1794756129147},{"id":"xp-090","name":"(47) Zia Rosaria","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129237,"updatedAt":1794756129147},{"id":"xp-091","name":"(48) Carmen","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129238,"updatedAt":1794756129147},{"id":"xp-092","name":"(48) Marito di Carmen","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129239,"updatedAt":1794756129147},{"id":"xp-093","name":"(43) Antonella","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129240,"updatedAt":1794756129147},{"id":"xp-094","name":"(42) Valeria Santoro","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Numero 95 usato due volte sul foglio","table":"","status":"da_inviare","createdAt":1794756129241,"updatedAt":1794756129147},{"id":"xp-095","name":"(50) Zio Enzo","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Sul foglio: '?'. Numero 95 usato due volte; gruppo 50 dedotto","table":"","status":"da_inviare","createdAt":1794756129242,"updatedAt":1794756129147},{"id":"xp-096","name":"(50) Moglie di zio Enzo","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Moglie di zio Enzo, sul foglio: '?'; gruppo 50 dedotto","table":"","status":"da_inviare","createdAt":1794756129243,"updatedAt":1794756129147},{"id":"xp-097","name":"(49) Carolina","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129244,"updatedAt":1794756129147},{"id":"xp-098","name":"(49) Marito di Carolina","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129245,"updatedAt":1794756129147},{"id":"xp-099","name":"(49) Figlie","side":"miriam","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"'FIGLIE?' accanto a Carmen: gruppo 48 dedotto","table":"","status":"da_inviare","createdAt":1794756129246,"updatedAt":1794756129147},{"id":"xp-100","name":"(51) Zio Franco Dileo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129247,"updatedAt":1794756129147},{"id":"xp-101","name":"(51) Zia Fifina","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129248,"updatedAt":1794756129147},{"id":"xp-102","name":"(51) Dileo Rocco (di Zio Franco)","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Cugino Marco - da verificare","table":"","status":"da_inviare","createdAt":1794756129249,"updatedAt":1794756129147},{"id":"xp-103","name":"(51) Moglie Rocco dileo zio Franco","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129250,"updatedAt":1794756129147},{"id":"xp-104","name":"(51) Dileo Dora (Zio Franco)","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Cugina Marco - da Verificare","table":"","status":"da_inviare","createdAt":1794756129251,"updatedAt":1794756129147},{"id":"xp-105","name":"(51) Marito Dora","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129252,"updatedAt":1794756129147},{"id":"xp-106","name":"(52) Zio Gino Dileo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129253,"updatedAt":1794756129147},{"id":"xp-107","name":"(52) Zia Enza (moglie di zio Gino)","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129254,"updatedAt":1794756129147},{"id":"xp-108","name":"(52) Dileo Rocco (di zio Gino)","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Cugino Marco - da verificare","table":"","status":"da_inviare","createdAt":1794756129255,"updatedAt":1794756129147},{"id":"xp-109","name":"(52) Moglie di Rocco di zio Gino","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129256,"updatedAt":1794756129147},{"id":"xp-110","name":"(52) Cugina Francesca Dileo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129257,"updatedAt":1794756129147},{"id":"xp-111","name":"(52) Marito Michele","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129258,"updatedAt":1794756129147},{"id":"xp-112","name":"(53) Zio Angelo Dileo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129259,"updatedAt":1794756129147},{"id":"xp-113","name":"(53) Zia Antonia di Zio Angelo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129260,"updatedAt":1794756129147},{"id":"xp-114","name":"(53) Massimo di Zio Angelo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"Cugino Marco - da verificare","table":"","status":"da_inviare","createdAt":1794756129261,"updatedAt":1794756129147},{"id":"xp-115","name":"(53) Moglie di Massimo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"forse","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129262,"updatedAt":1794756129147},{"id":"xp-116","name":"(53) Cigina Doriana di zio Angelo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129263,"updatedAt":1794756129147},{"id":"xp-117","name":"(53) Cugino Gianluca di zio Angelo","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129264,"updatedAt":1794756129147},{"id":"xp-118","name":"(54) Zio Enzo (da parte di Mamma)","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129265,"updatedAt":1794756129147},{"id":"xp-119","name":"(54) Moglie","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129266,"updatedAt":1794756129147},{"id":"xp-120","name":"(54) Cugino Nunzio","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129267,"updatedAt":1794756129147},{"id":"xp-121","name":"(54) Moglie di Nunzioi","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129268,"updatedAt":1794756129147},{"id":"xp-122","name":"(54) Cugina Nunzia","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129269,"updatedAt":1794756129147},{"id":"xp-123","name":"(54) Marito di Nunzia","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129270,"updatedAt":1794756129147},{"id":"xp-124","name":"(54) Zia Franca da parte di Mamma","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129271,"updatedAt":1794756129147},{"id":"xp-125","name":"(55) Dileo Rocco Cugino (di zio Michele)","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129272,"updatedAt":1794756129147},{"id":"xp-126","name":"(55) Moglie","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129273,"updatedAt":1794756129147},{"id":"xp-127","name":"(55) Dileo Francesco Cugino (di zio Michele)","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129274,"updatedAt":1794756129147},{"id":"xp-128","name":"(55) Moglie","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129275,"updatedAt":1794756129147},{"id":"xp-129","name":"(56) Zia Grazia","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129276,"updatedAt":1794756129147},{"id":"xp-130","name":"(56) Mino","side":"marco","cat":"parenti","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129277,"updatedAt":1794756129147},{"id":"xp-131","name":"(57) Pesenti Marco (Collega)","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129278,"updatedAt":1794756129147},{"id":"xp-132","name":"(57) Moglie di Pesenti","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129279,"updatedAt":1794756129147},{"id":"xp-133","name":"(57) Silvestri Marco (Collega)","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129280,"updatedAt":1794756129147},{"id":"xp-134","name":"(57) Lorenzo Vitangeli (Collega)","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129281,"updatedAt":1794756129147},{"id":"xp-135","name":"(57) Maddalena Moglie di Lorenzo","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129282,"updatedAt":1794756129147},{"id":"xp-136","name":"(57) Simone Pellicciari (Collega)","side":"marco","cat":"colleghi","adults":1,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129283,"updatedAt":1794756129147},{"id":"xb-00","name":"(Bambini) Maria Rita","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129647,"updatedAt":1794756129147},{"id":"xb-01","name":"(Bambini) Gabriele","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129648,"updatedAt":1794756129147},{"id":"xb-02","name":"(Bambini) Damiano","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129649,"updatedAt":1794756129147},{"id":"xb-03","name":"(Bambini) Marco","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129650,"updatedAt":1794756129147},{"id":"xb-04","name":"(Bambini) Francesco","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129651,"updatedAt":1794756129147},{"id":"xb-05","name":"(Bambini) Paula","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129652,"updatedAt":1794756129147},{"id":"xb-06","name":"(Bambini) Sofia","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129653,"updatedAt":1794756129147},{"id":"xb-07","name":"(Bambini) Bimba Ivan","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129654,"updatedAt":1794756129147},{"id":"xb-08","name":"(Bambini) Bianca Marika","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129655,"updatedAt":1794756129147},{"id":"xb-09","name":"(Bambini) Bianca","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129656,"updatedAt":1794756129147},{"id":"xb-10","name":"(Bambini) Virgy","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129657,"updatedAt":1794756129147},{"id":"xb-11","name":"(Bambini) Samuel","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129658,"updatedAt":1794756129147},{"id":"xb-12","name":"(Bambini) Figlia Marilena","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129659,"updatedAt":1794756129147},{"id":"xb-13","name":"(Bambini) Aida","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129660,"updatedAt":1794756129147},{"id":"xb-14","name":"(Bambini) Sole","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129661,"updatedAt":1794756129147},{"id":"xb-15","name":"(Bambini) Camilla","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129662,"updatedAt":1794756129147},{"id":"xb-16","name":"(Bambini) Emma","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129663,"updatedAt":1794756129147},{"id":"xb-17","name":"(Bambini) Lavinia","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129664,"updatedAt":1794756129147},{"id":"xb-18","name":"(Bambini) Martina","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129665,"updatedAt":1794756129147},{"id":"xb-19","name":"(Bambini) Beatrice","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129666,"updatedAt":1794756129147},{"id":"xb-20","name":"(Bambini) Francesca","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129667,"updatedAt":1794756129147},{"id":"xb-21","name":"(Bambini) Bimba Carlo Anna","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129668,"updatedAt":1794756129147},{"id":"xb-22","name":"(Bambini) Leya","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129669,"updatedAt":1794756129147},{"id":"xb-23","name":"(Bambini) Paola","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129670,"updatedAt":1794756129147},{"id":"xb-24","name":"(Bambini) Giuseppe","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129671,"updatedAt":1794756129147},{"id":"xb-25","name":"(Bambini) Irene","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129672,"updatedAt":1794756129147},{"id":"xb-26","name":"(Bambini) Diego","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129673,"updatedAt":1794756129147},{"id":"xb-27","name":"(Bambini) Samuel","side":"both","cat":"altri","adults":0,"kids":1,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"","table":"","status":"da_inviare","createdAt":1794756129674,"updatedAt":1794756129147},{"id":"xl-1","name":"Mamma Raffaella, Papà Ettore, Anna","adults":3,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-2","name":"Ilaria, Mimmo","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-3","name":"Zio Salvatore, Zia Carmela, Martina, Simone, Cristian, Nonna Anna","adults":6,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-4","name":"Aldo, Marika","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-5","name":"Zia Maria","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-6","name":"Zio Franco, Zia Pina","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-7","name":"Mimmo, Filly, Alessandro","adults":3,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-8-9","name":"Zio Nico, Ivan, Moglie Ivan, Marika","adults":4,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-10","name":"Zio Tiziano, Zia Sonia, figlio, figlia","adults":4,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-11","name":"Zia Marcella","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-12","name":"Zia Ketty, Roberta, Andrea, Giulia","adults":4,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-13","name":"Zia Maria, Perfetto","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-14","name":"Mimma, Rodolfo","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-15","name":"Marilena, marito","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-16","name":"Cristina, Angelo","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-17","name":"Vivian","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-18","name":"Lucia","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-19","name":"Flavia","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-20","name":"Benny","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-21","name":"Rosy","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-22","name":"Claudia","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-23","name":"Mariagrazia","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-24","name":"Ester","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-25","name":"Simona","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-26","name":"Lovi, Nico","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-27","name":"Mary, Valerio","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-28","name":"Chiara, Andrea","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-29","name":"Fabio","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-30","name":"Michele, Pina","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-31","name":"Bubu, moglie","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-32","name":"Annalisa, Marco","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-33","name":"Cosimo, Irene","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-34","name":"Lucia, Antonello","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-35","name":"Carlo, Anna","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-36","name":"Mariano, Nata","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-37","name":"Rocco, Patrizia, Marilena, Francesca","adults":4,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-38","name":"Lena, Pino","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-39","name":"Ale, Pamela","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-40","name":"Luciana, Dario","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-41","name":"Annamaria, Francesco","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-44","name":"Ciccio Marang., moglie","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-45","name":"Tommaso, compagna","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-46","name":"Gaetano, Patrizia","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-47","name":"Zia Rosaria","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-48","name":"Carmen, marito","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-43","name":"Antonella","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-42","name":"Valeria Santoro","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-50","name":"Zio Enzo, moglie","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-49","name":"Carolina, marito, figlie","adults":3,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-51","name":"Zio Franco Dileo, Zia Fifina, Dileo Rocco, Moglie Rocco dileo zio Franco, Dileo Dora, Marito Dora","adults":6,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-52","name":"Zio Gino Dileo, Zia Enza, Dileo Rocco, Moglie di Rocco di zio Gino, Cugina Francesca Dileo, Marito Michele","adults":6,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-53","name":"Zio Angelo Dileo, Zia Antonia di Zio Angelo, Massimo di Zio Angelo e altri 3","adults":6,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-54","name":"Zio Enzo, moglie, Cugino Nunzio e altri 4","adults":7,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-55","name":"Dileo Rocco Cugino (di zio Michele), moglie, Dileo Francesco Cugino (di zio Michele), moglie","adults":4,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-56","name":"Zia Grazia, Mino","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-col-pesenti","name":"Pesenti Marco (Collega), Moglie di Pesenti","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-col-silvestri","name":"Silvestri Marco (Collega)","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-col-lorenzo","name":"Lorenzo Vitangeli (Collega), Maddalena Moglie di Lorenzo","adults":2,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-col-simone","name":"Simone Pellicciari (Collega)","adults":1,"kids":0,"deleted":true,"updatedAt":1794756129147},{"id":"xl-bambini","name":"Bambini da assegnare alle famiglie","adults":0,"kids":28,"deleted":true,"updatedAt":1794756129147},{"id":"xl-forn-0","name":"Fotografo (Raffaele Vestito)","side":"both","cat":"altri","adults":3,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Fornitore","status":"da_inviare","createdAt":1794753221135,"updatedAt":1794753220185,"table":""},{"id":"xl-forn-1","name":"Band","side":"both","cat":"altri","adults":5,"kids":0,"sure":"sicuro","mode":"","phone":"","addr":"","notes":"Fornitore · da 4 a 5 persone","status":"da_inviare","createdAt":1794753221136,"updatedAt":1794753220185,"table":""}]};
+var C=JSON.parse(document.getElementById("content").textContent);
 var $=function(id){return document.getElementById(id);};
-function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-function num(v){v=Number(v);return isFinite(v)&&v>0?Math.min(99,Math.floor(v)):0;}
-function people(g){return num(g.adults)+num(g.kids);}
-function pick(v,map,def){return Object.prototype.hasOwnProperty.call(map,v)?v:def;}
-function norm(id,d){d=d||{};return {id:id,name:String(d.name||"").slice(0,120),side:pick(d.side,SIDES,"both"),cat:pick(d.cat,CATNAME,"altri"),
-  adults:num(d.adults),kids:num(d.kids),sure:pick(d.sure,SURE,"sicuro"),mode:pick(d.mode||"",MODES,""),phone:String(d.phone||""),addr:String(d.addr||""),
-  notes:String(d.notes||""),table:String(d.table||"").slice(0,40),status:pick(d.status,STATUS,"da_inviare"),createdAt:Number(d.createdAt)||0};}
-function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
-function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
-var toastT;
-function toast(msg){var t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2600);}
-function banner(txt,err){var b=$("banner");if(!txt){b.hidden=true;return;}b.hidden=false;b.className="banner"+(err?" err":"");b.textContent=txt;}
+function h(tag,attrs,kids){
+  var e=document.createElement(tag),k;
+  if(attrs)for(k in attrs){if(attrs[k]==null||attrs[k]===false)continue;
+    if(k==="class")e.className=attrs[k];else if(k==="text")e.textContent=attrs[k];else if(k.slice(0,2)==="on")e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k]===true?"":attrs[k]);}
+  (kids||[]).forEach(function(c){if(c!=null)e.appendChild(typeof c==="string"?document.createTextNode(c):c);});
+  return e;
+}
+function safeUrl(u){u=String(u||"").trim();return /^https?:\/\//i.test(u)?u:"";}
+function safeImg(u){u=String(u||"");return /^data:image\/(jpeg|png|webp);base64,/.test(u)||/^https:\/\//.test(u)?u:"";}
+var toastT;function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2600);}
+function weddingAt(hhmm){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(C.data||""))return null;
+  var p=C.data.split("-"),x=/^\d{1,2}:\d{2}$/.test(hhmm||"")?hhmm.split(":"):[0,0];
+  return new Date(+p[0],+p[1]-1,+p[2],+x[0],+x[1]);
+}
+function dateLong(){var d=weddingAt("00:00");if(!d)return "";var s=d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long",year:"numeric"});return s.charAt(0).toUpperCase()+s.slice(1);}
+var ICONS={aereo:"M3 14l18-6-6 12-3-5-9-1z",treno:"M9 3h6a3 3 0 013 3v8a3 3 0 01-3 3H9a3 3 0 01-3-3V6a3 3 0 013-3zM6 11h12M9 21l2-4M15 21l-2-4",auto:"M4 16v-4l2-5h12l2 5v4M4 16h16M4 16v2M20 16v2M7 13h.01M17 13h.01",taxi:"M5 17V8l3-3h8l3 3v9M5 17h14M5 12h14M8 20v-3M16 20v-3"};
+function icon(name){var s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");var p=document.createElementNS("http://www.w3.org/2000/svg","path");p.setAttribute("d",ICONS[name]||ICONS.auto);s.appendChild(p);return s;}
+function pic(src){src=safeImg(src);return src?h("img",{class:"photo-in",src:src,alt:""}):null;}
 
-/* ---------- riepilogo ---------- */
-function renderSummary(){
-  var tot=0,forse=0,ad=0,ki=0,by={marco:0,miriam:0,both:0};
-  state.guests.forEach(function(g){var p=people(g);if(g.sure==="forse"){forse+=p;return;}tot+=p;ad+=num(g.adults);ki+=num(g.kids);by[g.side]+=p;});
-  var bar="";["marco","miriam","both"].forEach(function(s){if(tot&&by[s])bar+='<span style="width:'+(by[s]/tot*100)+'%;background:var(--'+s+')"></span>';});
-  var tgt=state.target?(tot>state.target?'<b style="color:var(--no)">'+(tot-state.target)+' in più</b>':'<b>'+(state.target-tot)+' posti liberi</b>'):"";
-  $("summary").innerHTML=
-   '<div class="sum-row"><div class="big">'+tot+'<small>persone'+(forse?' + '+forse+' forse':'')+'</small></div>'+
-   '<label class="target" for="target">Obiettivo <input id="target" type="number" inputmode="numeric" min="0" max="999" value="'+(state.target||"")+'" placeholder="–"></label></div>'+
-   '<div class="split" aria-hidden="true">'+bar+'</div>'+
-   '<div class="legend"><span><i class="dot" style="background:var(--marco)"></i>Marco <b>'+by.marco+'</b></span>'+
-   '<span><i class="dot" style="background:var(--miriam)"></i>Miriam <b>'+by.miriam+'</b></span>'+
-   '<span><i class="dot" style="background:var(--both)"></i>Entrambi <b>'+by.both+'</b></span>'+
-   '<span>Adulti <b>'+ad+'</b></span><span>Bambini <b>'+ki+'</b></span>'+(tgt?'<span>'+tgt+'</span>':'')+'</div>';
+function scene(cls){
+  var B="#1f4a9c",M="#d9a521",P="#eeb4bf",R="#c64b3c",i;
+  var heart=function(x,y,k,c,rot){return '<path transform="translate('+x+' '+y+') rotate('+(rot||0)+') scale('+k+')" d="M0 3 C-3 -5 -14 -2 -9 7 C-6 12 -2 14 0 17 C2 14 6 12 9 7 C14 -2 3 -5 0 3 Z" fill="'+c+'" stroke="none"/>';};
+  var leaves='';for(i=0;i<9;i++){var t=i/8,x=34+150*t,y=176-74*t-34*t*(1-t);leaves+='<ellipse cx="'+x.toFixed(1)+'" cy="'+(y+(i%2?-11:9)).toFixed(1)+'" rx="12" ry="4.2" transform="rotate('+(i%2?-52:18)+' '+x.toFixed(1)+' '+(y+(i%2?-11:9)).toFixed(1)+')"/>';if(i%3===1)leaves+='<circle cx="'+(x+7).toFixed(1)+'" cy="'+(y+13).toFixed(1)+'" r="4.2" fill="'+B+'"/>';}
+  var scal=function(x,y,n){var d='M'+x+' '+y;for(var j=0;j<n;j++)d+=' q7 9 14 0';return d;};
+  var grapes='',rows=[[4,598,138],[3,606,152],[2,614,166],[1,622,180]];rows.forEach(function(r){for(var j=0;j<r[0];j++)grapes+='<circle cx="'+(r[1]+j*16)+'" cy="'+r[2]+'" r="7.6"/>';});
+  var d=document.createElement("div");
+  d.innerHTML='<svg class="scene '+(cls||"")+'" viewBox="0 0 760 200" role="img" aria-label="Disegni a mano: ramo d\'ulivo, trullo, posate, torta nuziale, vino, uva e candele">'+
+   '<g fill="none" stroke="'+B+'" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">'+
+   '<path d="M30 180 Q96 150 188 100"/>'+leaves+
+   '<path d="M196 184 V157 H238 V184 M191 157 L217 118 L243 157 Z M204 140 H230 M210 129 H224"/><circle cx="217" cy="113" r="3.4"/><path d="M211 184 V172 a6 6 0 0 1 12 0 V184"/>'+
+   '<g stroke="'+M+'"><ellipse cx="268" cy="106" rx="8.5" ry="14"/><path d="M268 120 V184 M292 184 V124 M284 94 V114 q0 10 8 10 q8 0 8 -10 V94 M292 94 V112"/></g>'+
+   '<path d="M334 162 q46 9 92 0 M380 166 v16 M364 186 q16 -5 32 0"/>'+
+   '<path d="M338 158 V124 M422 158 V124 M352 122 V96 M408 122 V96 M364 94 V74 q16 -5 32 0 V94"/>'+
+   '<path d="'+scal(338,124,6)+'"/><path d="'+scal(352,96,4)+'"/><path d="M338 142 q21 9 42 0 q21 9 42 0"/>'+
+   '<path d="M380 70 q-15 -17 -19 -3 q5 10 19 3 q15 -17 19 -3 q-5 10 -19 3 M378 71 q-8 10 -16 12 M382 71 q8 10 16 12"/>'+
+   '<path d="M470 184 V112 q0 -12 8 -16 V68 h12 V96 q8 4 8 16 V184 Z"/><path d="M474 130 h20 v30 h-20 z" fill="'+B+'"/>'+
+   '<path d="M523 98 h36 q2 34 -18 38 q-20 -4 -18 -38 Z M541 136 V178 M527 183 q14 -6 28 0"/><path d="M526 114 h30 q-2 17 -15 19 q-13 -2 -15 -19 Z" fill="'+B+'"/>'+
+   grapes+'<path d="M622 130 q3 -14 16 -17 M638 113 q12 -6 18 4 q-10 8 -18 -4"/>'+
+   '<path d="M693 184 V96" stroke="'+P+'" stroke-width="7"/><path d="M716 184 V78" stroke="'+M+'" stroke-width="6"/>'+
+   '<path d="M682 187 h22 M706 187 h20"/>'+
+   '<path d="M693 90 q-5 -8 0 -15 q5 7 0 15 Z M716 72 q-5 -8 0 -15 q5 7 0 15 Z" fill="'+M+'" stroke="'+M+'" stroke-width="1"/>'+
+   '</g>'+heart(312,72,1,M,-14)+heart(448,62,.8,M,12)+heart(584,74,1,M,8)+heart(128,84,.75,R,-10)+heart(662,96,.7,P,14)+heart(246,64,.6,P,-6)+
+   '</svg>';
+  return d.firstChild;
+}
+var PAGES=[["home","Home"],["storia","La storia"],["giorno","Il giorno"],["ospiti","Ostuni"],["sposati","Sposati?"],["riservata","Riservata"]];
+var state={page:"home",fun:0,ans:-1,unlocked:null,lockErr:"",timer:null};
+var CAN_EDIT=location.protocol==="file:"||location.hash==="#modifica";
+
+/* ---------- pagine ---------- */
+function pHome(){
+  var d=weddingAt(C.oraCerimonia),cover=safeImg(C.home.cover);
+  var hero=h("section",{class:"hero glass"+(cover?" photo":"")},[
+    h("div",{class:"eyebrow",text:C.home.eyebrow}),
+    h("h1",null,[C.sposi[0]+" ",h("em",{text:"&"})," "+C.sposi[1]]),
+    h("p",{class:"lead",text:C.home.lead}),
+    h("div",{class:"when"},[
+      h("span",{class:"chip"},[h("span",{class:"dot"}),d?dateLong()+" · ore "+C.oraCerimonia:"Data in arrivo"]),
+      h("span",{class:"chip",text:C.luogo})]),
+    scene()]);
+  if(cover)hero.style.backgroundImage='url("'+cover+'")';
+  var out=[hero];
+  if(d&&d>new Date()){
+    out.push(h("section",{class:"count","aria-label":"Conto alla rovescia"},["giorni","ore","minuti","secondi"].map(function(l,i){
+      return h("div",{class:"glass"},[h("b",{id:"cd"+i,text:"0"}),h("span",{text:l})]);})));
+  }
+  var facts=C.home.curiosita||[];
+  if(facts.length){
+    out.push(h("section",{class:"fun glass"},[
+      h("div",{class:"eyebrow",text:C.home.funTitolo}),
+      h("p",{id:"funText",text:facts[state.fun%facts.length].testo}),
+      h("button",{type:"button",class:"btn",text:"Un'altra",onclick:function(){state.fun=(state.fun+1)%facts.length;$("funText").textContent=facts[state.fun].testo;}})]));
+  }
+  if((C.home.festa||[]).length){
+    out.push(h("section",{class:"plain"},[h("h2",{text:C.home.festaTitolo}),h("p",{class:"lead",text:C.home.festaLead})]));
+    out.push(h("section",{class:"cards"},C.home.festa.map(function(c){return h("div",{class:"glass"},[h("span",{class:"tag",text:c.tag}),h("h3",{text:c.titolo}),h("p",{text:c.testo})]);})));
+  }
+  out.push(h("section",{class:"doors","aria-label":"Sezioni"},[
+    door("storia","La nostra storia","Da Barletta a Bologna e ritorno, una casa dopo l'altra.","Leggi le tappe →"),
+    door("giorno","Il giorno","Il programma del matrimonio, momento per momento.","Vedi il programma →"),
+    door("ospiti","Ostuni e dintorni","Come arrivare in masseria e cosa fare se vi fermate qualche giorno.","Organizza il viaggio →"),
+    door("sposati","Siamo sposati?","Controllate voi stessi. Spoiler: lavori in corso.","Verifica →")]));
+  return out;
+}
+function door(go,t,s,b){return h("button",{type:"button",class:"door","data-go":go},[h("h3",{text:t}),h("span",{text:s}),h("b",{text:b})]);}
+function head(eyebrow,title,lead,extra){return h("section",{class:"head glass"},[h("div",{class:"eyebrow",text:eyebrow}),h("h2",{text:title}),h("p",{class:"lead",text:lead})].concat(extra||[]));}
+function pStoria(){
+  var S=C.storia,n=S.tappe.length;
+  return [head("La nostra storia",S.titolo,S.lead),
+    h("section",{class:"figures","aria-label":"In numeri"},S.numeri.map(function(x){return h("div",{class:"glass"},[h("b",{text:x.n}),h("span",{text:x.l})]);})),
+    h("section",{class:"road","aria-label":"Le tappe"},S.tappe.map(function(t,i){
+      return h("div",{class:"stop glass"+(i===n-1?" last":"")},[pic(t.img),h("span",{class:"where",text:t.dove}),h("h3",{text:t.titolo}),h("p",{text:t.testo})]);})),
+    head(S.famEyebrow,S.famTitolo,S.famLead),
+    h("section",{class:"girls"},S.bambine.map(function(b){return h("div",{class:"glass"},[pic(b.img),h("div",{class:"date",text:b.quando}),h("p",{class:"lead",text:b.testo})]);}))];
+}
+function pGiorno(){
+  var G=C.giorno,day=weddingAt("00:00"),now=new Date(),cur=-1;
+  if(day&&now.toDateString()===day.toDateString())G.programma.forEach(function(m,i){var t=weddingAt(m.ora);if(t&&now>=t)cur=i;});
+  var past=day&&now>new Date(day.getFullYear(),day.getMonth(),day.getDate()+1);
+  var items=G.programma.map(function(m,i){
+    var more=h("span",{class:"more",text:m.testo,hidden:true});
+    var b=h("button",{type:"button",class:"moment"+(past||i<cur?" done":i===cur?" now":""),"aria-expanded":"false"},[
+      h("span",{class:"t",text:m.ora}),h("span",{class:"d"}),
+      h("span",null,[h("span",{class:"n",text:m.titolo}),h("span",{class:"s",text:m.dove}),more]),
+      i===cur?h("span",{class:"pill",text:"Adesso"}):h("span",{class:"a",text:"›"})]);
+    b.addEventListener("click",function(){more.hidden=!more.hidden;b.setAttribute("aria-expanded",String(!more.hidden));});
+    return b;});
+  return [head(day?dateLong():"Il programma",G.titolo,G.lead),
+    h("section",{class:"timeline","aria-label":"Programma della giornata"},items),
+    h("button",{type:"button",class:"cta",onclick:copyDay},[h("span",{text:"Copia il programma completo"}),h("span",{"aria-hidden":"true",text:"→"})]),
+    C.orariProvvisori?h("p",{class:"note",text:G.nota}):null];
+}
+function copyDay(){
+  var txt=C.sposi.join(" & ")+" – il programma"+(dateLong()?" di "+dateLong().toLowerCase():"")+"\n"+C.luogo+"\n\n"+C.giorno.programma.map(function(m){return m.ora+"  "+m.titolo+" ("+m.dove+")";}).join("\n");
+  copyText(txt,"Programma copiato: incollatelo dove volete.");
+}
+function copyText(txt,okMsg){var ko=function(){toast("Copia non riuscita su questo dispositivo.");};try{navigator.clipboard.writeText(txt).then(function(){toast(okMsg);},ko);}catch(e){ko();}}
+function link(cls,url,label){url=safeUrl(url);return url?h("a",{class:cls,href:url,target:"_blank",rel:"noopener"},[h("span",{text:label}),h("span",{"aria-hidden":"true",text:"→"})]):null;}
+function pOspiti(){
+  var O=C.ospiti;
+  return [head("Per i nostri ospiti",O.titolo,O.lead,[h("p",{class:"note",text:O.indirizzo}),link("cta",C.mappa,"Apri la masseria su Google Maps"),link("cta ghost",C.sitoMasseria,"Visita il sito della masseria")]),
+    h("h3",{text:"Come arrivare",style:"padding:6px 4px 0"}),
+    h("section",{class:"ways"},O.modi.map(function(w){return h("div",{class:"way glass"},[icon(w.icona),h("div",null,[h("h3",{text:w.titolo}),h("p",{text:w.testo})])]);})),
+    h("h3",{text:"Cosa fare nei dintorni",style:"padding:10px 4px 0"}),
+    h("section",{class:"cards"},O.cose.map(function(c){return h("div",{class:"glass"},[pic(c.img),h("span",{class:"tag",text:c.tag}),h("h3",{text:c.titolo}),h("p",{text:c.testo})]);})),
+    h("p",{class:"note",text:O.nota})];
+}
+function pSposati(){
+  var S=C.sposati,d=weddingAt(C.oraCerimonia),now=new Date();
+  if(d&&now>=d)return [h("section",{class:"wip glass"},[h("div",{class:"eyebrow",text:dateLong()}),h("h2",{text:S.dopoTitolo}),h("p",{class:"lead",text:S.dopoTesto})])];
+  var pct=0,start=new Date(S.inizio+"T00:00:00");
+  if(d&&!isNaN(start)&&d>start)pct=Math.max(1,Math.min(99,Math.round((now-start)/(d-start)*100)));
+  var days=d?Math.ceil((d-now)/864e5):null,fr=S.frasi||[];
+  return [h("section",{class:"wip glass"},[
+    h("span",{class:"stamp",text:"Work in progress"}),
+    h("div",{class:"eyebrow",text:"Siamo sposati?"}),
+    h("h2",{text:S.primaTitolo}),
+    h("p",{class:"lead",text:S.primaTesto}),
+    h("div",{class:"bar",role:"progressbar","aria-valuemin":"0","aria-valuemax":"100","aria-valuenow":String(pct),"aria-label":"Matrimonio in caricamento"},[(function(){var s=h("span");s.style.width=pct+"%";return s;})()]),
+    h("p",{class:"note",text:"Matrimonio in caricamento: "+pct+"%"+(days!=null?" · mancano "+days+" giorni":"")}),
+    h("p",{class:"answer",id:"ans",text:state.ans>=0&&fr.length?fr[state.ans%fr.length].testo:""}),
+    fr.length?h("button",{type:"button",class:"btn solid",text:"Controlla di nuovo",onclick:function(){state.ans=(state.ans+1)%fr.length;$("ans").textContent=fr[state.ans].testo;}}):null])];
+}
+function pRiservata(){
+  var P=C.privata;
+  if(state.unlocked){var U=state.unlocked;
+    return [h("section",{class:"lock glass"},[h("div",{class:"eyebrow",text:"Area riservata"}),h("h2",{text:U.titolo||"Per voi"}),h("p",{class:"lead",text:U.testo||""})].concat((U.links||[]).map(function(l){return link("cta",l.url,l.etichetta||l.url);})))];}
+  if(!P.cipher)return [h("section",{class:"lock glass"},[h("div",{class:"eyebrow",text:"Riservata"}),h("h2",{text:P.titolo}),h("p",{class:"lead",text:P.vuota})])];
+  var inp=h("input",{type:"password",id:"pw",autocomplete:"off",placeholder:"Password","aria-label":"Password"});
+  var f=h("form",null,[inp,h("button",{type:"submit",class:"btn solid",text:"Entra"})]);
+  f.addEventListener("submit",function(e){e.preventDefault();
+    decrypt(inp.value,P.cipher).then(function(obj){state.unlocked=obj;state.lockErr="";render();},function(){state.lockErr="Password sbagliata. Controllate maiuscole e spazi.";render();});});
+  return [h("section",{class:"lock glass"},[h("div",{class:"eyebrow",text:"Riservata"}),h("h2",{text:P.titolo}),h("p",{class:"lead",text:P.lead}),f,state.lockErr?h("p",{class:"err",text:state.lockErr}):null])];
 }
 
-/* ---------- viste ---------- */
-function viewGuida(){
-  var h='<div class="tools"><div class="banner">Percorrete i passaggi uno alla volta, ognuno per la propria parte. Nel dubbio aggiungete e segnate <b>Forse</b>: a tagliare si fa sempre in tempo.</div>';
-  CATS.forEach(function(c,i){
-    var n={marco:0,miriam:0,both:0};
-    state.guests.forEach(function(g){if(g.cat===c.id)n[g.side]+=people(g);});
-    h+='<section class="card step"><div class="step-head"><div><div class="step-n">Passo '+(i+1)+' di '+CATS.length+'</div><h2>'+esc(c.t)+'</h2></div>'+
-       '<button class="btn small primary" type="button" data-add="'+c.id+'">Aggiungi</button></div><p>'+esc(c.q)+'</p><div class="counts">'+
-       ["marco","miriam","both"].map(function(s){return '<span class="pill '+(n[s]?s:"zero")+'">'+SIDES[s]+' '+n[s]+'</span>';}).join("")+'</div></section>';
-  });
-  var forse=state.guests.filter(function(g){return g.sure==="forse";}).length;
-  var noc=state.guests.filter(function(g){return !g.phone&&!g.addr;}).length;
-  h+='<section class="card step"><div class="step-n">Poi</div><h2>Ripassate insieme</h2>'+
-     '<p>1. Fissate l\'obiettivo in alto in base alla sala e al budget.<br>2. Decidete i Forse uno per uno'+(forse?' (ora sono '+forse+')':'')+'.<br>3. Completate telefono o indirizzo'+(noc?' (mancano per '+noc+' inviti)':'')+'.<br>4. Passate alla sezione Inviti per segnare chi è stato invitato e chi ha risposto.</p></section></div>';
-  return h;
+/* ---------- cifratura dell'area riservata ---------- */
+function b64(buf){var s="",a=new Uint8Array(buf);for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s);}
+function unb64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+function keyFrom(pw,salt){
+  return crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]).then(function(k){
+    return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:200000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);});
 }
-function filtered(){
-  var q=state.q.trim().toLowerCase();
-  return state.guests.filter(function(g){
-    if(state.fSide&&g.side!==state.fSide)return false;
-    if(state.fSure&&g.sure!==state.fSure)return false;
-    if(q&&(g.name+" "+g.notes).toLowerCase().indexOf(q)<0)return false;
-    return true;});
+function encrypt(pw,obj){
+  var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  return keyFrom(pw,salt).then(function(k){return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},k,new TextEncoder().encode(JSON.stringify(obj)));})
+    .then(function(ct){return {s:b64(salt),i:b64(iv),c:b64(ct)};});
 }
-function chips(){
-  var c=function(k,v,l){return '<button type="button" class="chip" data-f="'+k+'" data-v="'+v+'" aria-pressed="'+(state[k]===v)+'">'+l+'</button>';};
-  return '<div class="chips">'+c("fSide","","Tutti")+c("fSide","marco","Marco")+c("fSide","miriam","Miriam")+c("fSide","both","Entrambi")+'</div>'+
-         '<div class="chips">'+c("fSure","","Ogni certezza")+c("fSure","sicuro","Sicuri")+c("fSure","probabile","Probabili")+c("fSure","forse","Forse")+'</div>';
+function decrypt(pw,box){
+  try{return keyFrom(pw,unb64(box.s)).then(function(k){return crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(box.i)},k,unb64(box.c));})
+    .then(function(pt){return JSON.parse(new TextDecoder().decode(pt));});}catch(e){return Promise.reject(e);}
 }
-function viewLista(){
-  var h='<div class="tools"><input class="search" id="q" type="search" placeholder="Cerca per nome o nota" value="'+esc(state.q)+'" aria-label="Cerca">'+chips();
-  if(!state.guests.length){return h+'<div class="empty">La lista è vuota. Partite dalla Guida oppure toccate Aggiungi.</div></div>';}
-  var list=filtered();
-  if(!list.length)h+='<div class="empty">Nessun invito con questi filtri.</div>';
-  CATS.forEach(function(c){
-    var gs=list.filter(function(g){return g.cat===c.id;}).sort(function(a,b){return a.name.localeCompare(b.name,"it",{numeric:true});});
-    if(!gs.length)return;
-    var p=gs.reduce(function(s,g){return s+people(g);},0);
-    h+='<div class="group-title"><span>'+esc(c.t)+'</span><span>'+p+' persone</span></div><div class="rows">'+gs.map(function(g){
-      return '<button type="button" class="row" data-edit="'+esc(g.id)+'"><span><span class="name">'+esc(g.name||"Senza nome")+'</span>'+
-        '<span class="meta"><span class="pill '+g.side+'">'+SIDES[g.side]+'</span><span class="pill '+g.sure+'">'+SURE[g.sure]+'</span>'+
-        (num(g.kids)?'<span>'+num(g.adults)+' adulti, '+num(g.kids)+' bambini</span>':'')+(tableOf(g)?'<span>'+esc(tableOf(g).name)+'</span>':'')+'</span></span><span class="n">'+people(g)+'</span></button>';
-    }).join("")+'</div>';
-  });
-  return h+'</div>';
-}
-function viewInviti(){
-  var gs=state.guests.filter(function(g){return g.sure!=="forse";});
-  var c={da_inviare:0,inviato:0,si:0,no:0},pSi=0;
-  gs.forEach(function(g){c[g.status]++;if(g.status==="si")pSi+=people(g);});
-  var h='<div class="tools"><section class="card"><h2>Stato degli inviti</h2><div class="legend">'+
-    '<span>Da inviare <b>'+c.da_inviare+'</b></span><span>Inviati <b>'+c.inviato+'</b></span><span>Vengono <b>'+c.si+'</b> ('+pSi+' persone)</span><span>Non vengono <b>'+c.no+'</b></span></div>'+
-    '<div class="actions"><button class="btn small" type="button" id="copyCsv">Copia elenco per Excel</button><button class="btn small" type="button" id="copyTxt">Copia nomi e telefoni</button></div></section>';
-  if(!gs.length)return h+'<div class="empty">Qui compaiono gli inviti segnati come Sicuro o Probabile.</div></div>';
-  gs=gs.slice().sort(function(a,b){var o=["da_inviare","inviato","si","no"];return o.indexOf(a.status)-o.indexOf(b.status)||a.name.localeCompare(b.name,"it",{numeric:true});});
-  h+='<div class="rows">'+gs.map(function(g){
-    var contact=g.phone||g.addr;
-    return '<div class="row inv st-'+g.status+'"><button type="button" data-edit="'+esc(g.id)+'" style="all:unset;cursor:pointer;flex:1;min-width:0"><span class="name">'+esc(g.name||"Senza nome")+'</span>'+
-      '<span class="meta"><span>'+people(g)+' pers.</span><span>'+esc(MODES[g.mode])+'</span>'+(contact?'<span>'+esc(g.phone||g.addr)+'</span>':'<span class="missing">Manca il contatto</span>')+'</span></button>'+
-      '<select data-status="'+esc(g.id)+'" id="st-'+esc(g.id)+'" aria-label="Stato invito di '+esc(g.name)+'">'+Object.keys(STATUS).map(function(k){return '<option value="'+k+'"'+(k===g.status?' selected':'')+'>'+STATUS[k]+'</option>';}).join("")+'</select></div>';
-  }).join("")+'</div></div>';
-  return h;
-}
-function tblHtml(t){
-  var occ=occupancy(t.id),sp=t.id==="t-sposi",size=Math.round(50+Math.min(t.seats,14)*2.2);
-  var st=sp?"width:108px;height:46px":"width:"+size+"px;height:"+size+"px";
-  return '<button type="button" class="tbl '+t.shape+(sp?" sposi":occ>t.seats?" over":occ===t.seats?" full":"")+'" data-tbl="'+esc(t.id)+'" style="left:'+t.x+'%;top:'+t.y+'%;'+st+'" aria-label="'+esc(t.name)+', '+occ+(sp?' ospiti':' di '+t.seats+' posti')+'"><b>'+esc(t.name||"Tavolo")+'</b>'+(sp?(occ?'<span>+'+occ+'</span>':''):'<span>'+occ+'/'+t.seats+'</span>')+'</button>';
-}
-function viewTavoli(){
-  var todo=0,done=0,seats=0;
-  state.guests.forEach(function(g){if(g.sure==="forse")return;var p=people(g);if(tableOf(g))done+=p;else todo+=p;});
-  var ts=state.tables.slice().sort(function(a,b){return (a.id==="t-sposi"?0:1)-(b.id==="t-sposi"?0:1)||a.name.localeCompare(b.name,"it",{numeric:true});});
-  ts.forEach(function(t){if(t.id!=="t-sposi")seats+=t.seats;});
-  var h='<div class="tools"><section class="card"><h2>Sala e tavoli</h2><div class="legend"><span>Tavoli <b>'+(ts.length-1)+'</b></span><span>Posti <b>'+seats+'</b></span><span>Sistemati <b>'+done+'</b></span><span>Da sistemare <b>'+todo+'</b></span></div>'+
-    '<div class="actions"><button class="btn small" type="button" data-newt="round">+ Tavolo rotondo</button><button class="btn small" type="button" data-newt="square">+ Tavolo quadrato</button></div></section>'+
-    '<div class="room" id="room" role="group" aria-label="Pianta della sala">'+ts.map(tblHtml).join("")+'</div>'+
-    '<p class="hint">Trascinate i tavoli per disporli nella sala rispetto al tavolo degli sposi. Toccate un tavolo per cambiare nome, forma e posti e per scegliere chi si siede.</p>'+
-    '<div class="group-title"><span>Elenco tavoli</span><span>'+done+' persone sistemate</span></div><div class="rows">'+ts.map(function(t){
-      var gs=state.guests.filter(function(g){return g.table===t.id;}),occ=occupancy(t.id),sp=t.id==="t-sposi";
-      return '<button type="button" class="row" data-tbl="'+esc(t.id)+'"><span><span class="name">'+esc(t.name||"Tavolo")+'</span><span class="meta"><span>'+(gs.length?esc(gs.map(function(g){return g.name;}).join(" · ")):"Nessuno seduto")+'</span></span></span><span class="n"'+(!sp&&occ>t.seats?' style="color:var(--no)"':'')+'>'+(sp?(occ?"+"+occ:""):occ+"/"+t.seats)+'</span></button>';
-    }).join("")+'</div></div>';
-  return h;
-}
-function renderTableDlg(){
-  var t=state.tables.filter(function(x){return x.id===state.tEdit&&!x.deleted;})[0],dlg=$("tdlg");
-  if(!t){state.tEdit=null;if(dlg.open)dlg.close();return;}
-  var sp=t.id==="t-sposi",occ=occupancy(t.id);
-  var seated=state.guests.filter(function(g){return g.table===t.id;});
-  var free=state.guests.filter(function(g){return !tableOf(g)&&g.sure!=="forse";}).sort(function(a,b){return a.name.localeCompare(b.name,"it",{numeric:true});});
-  $("tdlgBody").innerHTML='<h2>'+(sp?"Tavolo degli sposi":"Tavolo")+'</h2>'+
-    '<div class="field"><label for="t-name">Nome</label><input type="text" id="t-name" maxlength="30" autocomplete="off" value="'+esc(t.name)+'"></div>'+
-    '<div class="field"><span class="lab">Forma</span><div class="seg" role="radiogroup" aria-label="Forma"><label><input type="radio" name="tshape" id="t-shape-round" value="round"'+(t.shape==="round"?" checked":"")+'><span>Rotondo</span></label><label><input type="radio" name="tshape" id="t-shape-square" value="square"'+(t.shape==="square"?" checked":"")+'><span>Quadrato</span></label></div></div>'+
-    (sp?'':'<div class="field"><span class="lab">Posti</span><div class="stepper"><button type="button" data-tseat="-1" aria-label="Un posto in meno">−</button><output id="t-seats">'+t.seats+'</output><button type="button" data-tseat="1" aria-label="Un posto in più">+</button></div></div>')+
-    '<div class="field"><span class="lab">Seduti qui: '+occ+(sp?' oltre a voi due':' su '+t.seats)+(!sp&&occ>t.seats?' <b style="color:var(--no)">('+(occ-t.seats)+' di troppo)</b>':'')+'</span><div>'+
-      (seated.length?seated.map(function(g){return '<div class="seat"><span><b>'+esc(g.name)+'</b> <span class="hint">'+people(g)+' pers.</span></span><button type="button" class="btn small" data-unseat="'+esc(g.id)+'">Togli</button></div>';}).join(""):'<p class="hint">Ancora nessuno.</p>')+'</div></div>'+
-    '<div class="field"><label for="t-addg">Fai sedere un nucleo</label><select id="t-addg"><option value="">'+(free.length?'Scegli tra i '+free.length+' da sistemare':'Tutti hanno già un tavolo')+'</option>'+free.map(function(g){return '<option value="'+esc(g.id)+'">'+esc(g.name)+' ('+people(g)+')</option>';}).join("")+'</select></div>'+
-    '<div class="actions"><button class="btn primary" type="button" data-tclose="1">Fatto</button>'+(sp?'':'<button class="btn danger" type="button" data-tdel="1">'+(state.tDelArmed?"Tocca ancora per eliminare":"Elimina tavolo")+'</button>')+'</div>';
-  if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");}
+
+/* ---------- disegno ---------- */
+function tick(){
+  var d=weddingAt(C.oraCerimonia);if(!d||!$("cd0"))return;
+  var s=Math.max(0,Math.floor((d-new Date())/1000));
+  $("cd0").textContent=Math.floor(s/86400);$("cd1").textContent=Math.floor(s%86400/3600);$("cd2").textContent=Math.floor(s%3600/60);$("cd3").textContent=s%60;
 }
 function render(){
-  renderSummary();
-  var v=$("view"),keep=document.activeElement&&document.activeElement.id==="q";
-  v.innerHTML=state.tab==="lista"?viewLista():state.tab==="inviti"?viewInviti():state.tab==="tavoli"?viewTavoli():viewGuida();
-  if(state.tEdit)renderTableDlg();
-  if(keep){var q=$("q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}}
-  Array.prototype.forEach.call(document.querySelectorAll("nav.tabs a"),function(a){
-    if(a.dataset.tab===state.tab)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});
+  var app=$("app");app.textContent="";
+  document.title=C.sposi.join(" e ")+" sposi";
+  app.appendChild(h("nav",{class:"top glass","aria-label":"Pagine del sito"},[
+    h("div",{class:"mono","aria-hidden":"true",text:(C.sposi[0]||"").charAt(0)+(C.sposi[1]||"").charAt(0)}),
+    h("div",{class:"tabs"},PAGES.map(function(p){return h("button",{type:"button","data-go":p[0],"aria-current":state.page===p[0]?"page":null,text:p[1]});}))]));
+  var body={home:pHome,storia:pStoria,giorno:pGiorno,ospiti:pOspiti,sposati:pSposati,riservata:pRiservata}[state.page]();
+  app.appendChild(h("main",{class:"page"},body));
+  app.appendChild(h("footer",null,[state.page==="home"?null:scene("foot"),h("span",{text:C.sposi.join(" & ")+" · "+(dateLong()||"Ostuni")}),
+    CAN_EDIT?h("button",{type:"button",class:"btn",text:"✎ Modifica il sito",onclick:openEditor}):null]));
+  tick();
 }
-function route(){var h=(location.hash||"").replace("#","");state.tab=(h==="lista"||h==="inviti"||h==="guida"||h==="tavoli")?h:(state.guests.length?"lista":"guida");render();}
+function go(name,scroll){
+  if(!PAGES.some(function(p){return p[0]===name;}))name="home";
+  state.page=name;render();
+  if(scroll){try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}}
+  if(!CAN_EDIT){try{history.replaceState(null,"","#"+name);}catch(e){}}
+}
+document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-go]");if(t)go(t.dataset.go,true);});
+state.fun=Math.floor(Math.random()*((C.home.curiosita||[]).length||1));
+go((location.hash||"").replace("#",""),false);
+setInterval(tick,1000);
 
-/* ---------- salvataggio ---------- */
-function failed(e){
-  if(e&&e.code==="invalid_argument"){state.readonly=true;banner("Puoi vedere la lista ma non modificarla. Chiedi a chi ha creato la pagina di condividerla con te come Editor.",true);}
-  else if(e&&e.code==="quota_exceeded"){toast("Spazio esaurito: eliminate qualche voce.");}
-  else toast("Salvataggio non riuscito. Riprovate tra poco.");
-}
-function clean(r){if(!r||typeof r.id!=="string"||!/^[A-Za-z0-9_-]{1,40}$/.test(r.id))return null;var g=norm(r.id,r);g.updatedAt=Number(r.updatedAt)||0;g.deleted=!!r.deleted;return g;}
-function cleanT(r){if(!r||typeof r.id!=="string"||!/^[A-Za-z0-9_-]{1,40}$/.test(r.id))return null;
-  var x=Number(r.x),y=Number(r.y);
-  return {id:r.id,name:String(r.name||"").slice(0,30),shape:r.shape==="square"?"square":"round",seats:Math.max(1,Math.min(30,num(r.seats)||8)),
-    x:isFinite(x)?Math.max(6,Math.min(94,x)):50,y:isFinite(y)?Math.max(6,Math.min(94,y)):50,updatedAt:Number(r.updatedAt)||0,deleted:!!r.deleted};}
-function refresh(){
-  state.guests=state.all.filter(function(g){return !g.deleted;});
-  if(!state.tablesAll.some(function(t){return t.id==="t-sposi";}))state.tablesAll.push(cleanT({id:"t-sposi",name:"Sposi",shape:"square",seats:2,x:50,y:10,updatedAt:0}));
-  state.tables=state.tablesAll.filter(function(t){return !t.deleted||t.id==="t-sposi";});
-}
-function tableOf(g){if(!g.table)return null;for(var i=0;i<state.tables.length;i++)if(state.tables[i].id===g.table)return state.tables[i];return null;}
-function occupancy(id){var n=0;state.guests.forEach(function(g){if(g.table===id)n+=people(g);});return n;}
-function patchTable(id,patch){
-  state.tablesAll=state.tablesAll.map(function(x){if(x.id!==id)return x;var o={};for(var k in x)o[k]=x[k];for(var p in patch)o[p]=patch[p];o.updatedAt=Date.now();return cleanT(o);});
-  return commit();
-}
-function addTable(shape){
-  var n=state.tables.length,i=n-1,cols=[20,50,80];
-  var t=cleanT({id:"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:"Tavolo "+n,shape:shape,seats:shape==="round"?10:8,x:cols[i%3],y:Math.min(90,30+Math.floor(i/3)%4*19),updatedAt:Date.now()});
-  state.tablesAll.push(t);commit();toast(t.name+" aggiunto: trascinatelo al suo posto.");
-}
-function persist(){
-  try{localStorage.setItem(KEY,JSON.stringify({app:"lista-invitati-nozze",v:1,guests:state.all,tables:state.tablesAll,target:state.target,targetAt:state.targetAt}));banner("");}
-  catch(e){banner("Questo browser non permette di salvare la lista (forse è in navigazione privata). Le modifiche si perdono chiudendo la pagina.",true);}
-}
-function commit(){refresh();persist();render();return Promise.resolve();}
-function newId(){return "g"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
-function saveGuest(id,data){
-  var g=clean({id:id||newId(),name:data.name,side:data.side,cat:data.cat,adults:data.adults,kids:data.kids,sure:data.sure,mode:data.mode,phone:data.phone,addr:data.addr,notes:data.notes,table:data.table,status:data.status,createdAt:data.createdAt,updatedAt:Date.now()});
-  if(id)state.all=state.all.map(function(x){return x.id===id?g:x;});else state.all.push(g);
-  return commit();
-}
-function patchGuest(id,patch){
-  state.all=state.all.map(function(x){if(x.id!==id)return x;var o={};for(var k in x)o[k]=x[k];for(var p in patch)o[p]=patch[p];o.updatedAt=Date.now();return clean(o);});
-  return commit();
-}
-function delGuest(id){return patchGuest(id,{deleted:true});}
-function merge(d){
-  var n=0,map={};state.all.forEach(function(g){map[g.id]=g;});
-  (Array.isArray(d.guests)?d.guests:[]).slice(0,5000).forEach(function(r){var g=clean(r);if(!g)return;var old=map[g.id];if(!old||g.updatedAt>old.updatedAt){map[g.id]=g;n++;}});
-  state.all=Object.keys(map).map(function(k){return map[k];});
-  var tm={};state.tablesAll.forEach(function(t){tm[t.id]=t;});
-  (Array.isArray(d.tables)?d.tables:[]).slice(0,300).forEach(function(r){var t=cleanT(r);if(!t)return;var old=tm[t.id];if(!old||t.updatedAt>old.updatedAt){tm[t.id]=t;n++;}});
-  state.tablesAll=Object.keys(tm).map(function(k){return tm[k];});
-  var ta=Number(d.targetAt)||0;if(ta>state.targetAt){state.targetAt=ta;var t=Number(d.target);state.target=isFinite(t)&&t>0?Math.min(999,Math.floor(t)):0;}
-  return n;
-}
-function payload(){return JSON.stringify({app:"lista-invitati-nozze",v:1,exportedAt:Date.now(),guests:state.all,tables:state.tablesAll,target:state.target,targetAt:state.targetAt});}
-function exportCopy(){
-  var name="lista-invitati.txt",text=payload();
-  try{var f=new File([text],name,{type:"text/plain"});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:"Lista invitati"}).catch(function(){});return;}}catch(e){}
-  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"}));a.download=name;document.body.appendChild(a);a.click();a.remove();
-  toast("Copia scaricata: inviate il file lista-invitati.txt.");
-}
-function importCopy(file){
-  var r=new FileReader();
-  r.onload=function(){
-    var d;try{d=JSON.parse(String(r.result));}catch(e){d=null;}
-    if(!d||d.app!=="lista-invitati-nozze"){toast("Questo file non è una copia della lista.");return;}
-    var n=merge(d);commit();toast(n?"Liste unite: "+n+" voci aggiornate.":"Nessuna novità: le liste erano già uguali.");
-    var dlg=$("swap");if(dlg.close)dlg.close();
-  };
-  r.onerror=function(){toast("Non riesco a leggere il file.");};
-  r.readAsText(file);
-}
-
-/* ---------- modulo ---------- */
-var fAdults=2,fKids=0;
-function setRadio(name,v){var el=document.querySelector('input[name="'+name+'"][value="'+v+'"]');if(el)el.checked=true;}
-function getRadio(name){var el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:"";}
-function openForm(g,defaults){
-  state.editing=g?g.id:null;state.delArmed=false;
-  var d=g||{name:"",side:lsGet("inv-side")||"marco",cat:(defaults&&defaults.cat)||lsGet("inv-cat")||"famiglia",adults:2,kids:0,sure:"sicuro",mode:"",phone:"",addr:"",notes:""};
-  $("dlgTitle").textContent=g?"Modifica invito":"Nuovo invito";
-  $("f-name").value=d.name;setRadio("side",pick(d.side,SIDES,"marco"));$("f-cat").value=d.cat;
-  fAdults=num(d.adults);fKids=num(d.kids);$("f-adults").textContent=fAdults;$("f-kids").textContent=fKids;
-  setRadio("sure",d.sure);$("f-mode").value=d.mode;$("f-phone").value=d.phone;$("f-addr").value=d.addr;$("f-notes").value=d.notes;
-  $("f-more").open=!!(g&&(d.mode||d.phone||d.addr||d.notes));
-  $("delBtn").hidden=!g;$("delBtn").textContent="Elimina";$("saveMoreBtn").hidden=!!g;
-  var dlg=$("dlg");if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");}
-  if(!g)$("f-name").focus();
-}
-function closeForm(){var dlg=$("dlg");if(dlg.close)dlg.close();else dlg.removeAttribute("open");}
-function submit(again){
-  if(state.readonly){toast("Non hai il permesso di modificare.");return;}
-  var name=$("f-name").value.trim();
-  if(!name){toast("Scrivete un nome.");$("f-name").focus();return;}
-  if(fAdults+fKids<1){toast("Serve almeno una persona.");return;}
-  var old=state.editing?state.guests.filter(function(g){return g.id===state.editing;})[0]:null;
-  var data={name:name,side:getRadio("side")||"both",cat:$("f-cat").value,adults:fAdults,kids:fKids,sure:getRadio("sure")||"sicuro",
-    mode:$("f-mode").value,phone:$("f-phone").value.trim(),addr:$("f-addr").value.trim(),notes:$("f-notes").value.trim(),
-    table:old?old.table:"",status:old?old.status:"da_inviare",createdAt:old&&old.createdAt?old.createdAt:Date.now()};
-  lsSet("inv-side",data.side);lsSet("inv-cat",data.cat);
-  var b1=$("saveBtn"),b2=$("saveMoreBtn");b1.disabled=b2.disabled=true;
-  saveGuest(state.editing,data).then(function(){
-    toast("Salvato: "+name);
-    if(again){openForm(null,{cat:data.cat});}else closeForm();
-  },failed).then(function(){b1.disabled=b2.disabled=false;});
-}
-
-/* ---------- copia ---------- */
-function copy(text,ok){
-  var done=function(){toast(ok);},fb=function(){toast("Copia non riuscita su questo dispositivo.");};
-  try{navigator.clipboard.writeText(text).then(done,fb);}catch(e){fb();}
-}
-function csv(){
-  var cell=function(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';};
-  var rows=[["Nome","Da parte di","Categoria","Adulti","Bambini","Certezza","Invito","Telefono","Indirizzo","Stato","Tavolo","Note"]];
-  state.guests.forEach(function(g){rows.push([g.name,SIDES[g.side],CATNAME[g.cat],num(g.adults),num(g.kids),SURE[g.sure],MODES[g.mode],g.phone,g.addr,STATUS[g.status],tableOf(g)?tableOf(g).name:"",g.notes]);});
-  return rows.map(function(r){return r.map(cell).join(";");}).join("\n");
-}
-
-/* ---------- eventi ---------- */
-document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-add],[data-edit],[data-f],[data-step]");
-  if(t){
-    if(t.dataset.add){openForm(null,{cat:t.dataset.add});return;}
-    if(t.dataset.edit){var g=state.guests.filter(function(x){return x.id===t.dataset.edit;})[0];if(g)openForm(g);return;}
-    if(t.dataset.f){state[t.dataset.f]=t.dataset.v;render();return;}
-    if(t.dataset.step){
-      if(t.dataset.step==="adults"){fAdults=Math.max(0,Math.min(20,fAdults+Number(t.dataset.d)));$("f-adults").textContent=fAdults;}
-      else{fKids=Math.max(0,Math.min(20,fKids+Number(t.dataset.d)));$("f-kids").textContent=fKids;}
-      return;}
+/* ---------- pannello di modifica ---------- */
+var FORM=[
+ {t:"Dati generali",f:[["sposi.0","Nome dello sposo"],["sposi.1","Nome della sposa"],["data","Data del matrimonio (anno-mese-giorno, es. 2027-06-13)"],["oraCerimonia","Ora della cerimonia (es. 18:00)"],["luogo","Luogo (riga breve)"],["mappa","Link a Google Maps"],["sitoMasseria","Sito della masseria"]]},
+ {t:"Home",f:[["home.eyebrow","Scritta piccola in alto"],["home.lead","Testo di benvenuto","ta"],["home.cover","Foto di copertina","img"],["home.funTitolo","Titolo del riquadro divertente"],["home.festaTitolo","\"Una festa per tutti\": titolo"],["home.festaLead","\"Una festa per tutti\": testo","ta"]],
+  l:[["home.curiosita","Frasi divertenti (ne esce una a caso)",[["testo","Frase","ta"]]],
+     ["home.festa","Riquadri \"Una festa per tutti\"",[["tag","Etichetta"],["titolo","Titolo"],["testo","Testo","ta"]]]]},
+ {t:"La storia",f:[["storia.titolo","Titolo"],["storia.lead","Introduzione","ta"],["storia.famEyebrow","Bambine: scritta piccola"],["storia.famTitolo","Bambine: titolo"],["storia.famLead","Bambine: testo","ta"]],
+  l:[["storia.numeri","Numeri in evidenza",[["n","Numero"],["l","Descrizione"]]],
+     ["storia.tappe","Tappe",[["dove","Luogo / etichetta"],["titolo","Titolo"],["testo","Descrizione","ta"],["img","Foto","img"]]],
+     ["storia.bambine","Bambine",[["quando","Quando"],["testo","Testo","ta"],["img","Foto","img"]]]]},
+ {t:"Il giorno",f:[["giorno.titolo","Titolo"],["giorno.lead","Introduzione","ta"],["orariProvvisori","Mostra la nota sugli orari provvisori","chk"],["giorno.nota","Nota sugli orari","ta"]],
+  l:[["giorno.programma","Momenti della giornata",[["ora","Ora (es. 18:00)"],["titolo","Titolo"],["dove","Dove"],["testo","Descrizione","ta"]]]]},
+ {t:"Ostuni e come arrivare",f:[["ospiti.titolo","Titolo"],["ospiti.lead","Introduzione","ta"],["ospiti.indirizzo","Indirizzo della masseria"],["ospiti.nota","Nota finale"]],
+  l:[["ospiti.modi","Come arrivare",[["titolo","Titolo"],["testo","Descrizione","ta"]]],
+     ["ospiti.cose","Cosa fare nei dintorni",[["tag","Etichetta"],["titolo","Titolo"],["testo","Descrizione","ta"],["img","Foto","img"]]]]},
+ {t:"Siamo sposati?",f:[["sposati.primaTitolo","Prima del matrimonio: titolo"],["sposati.primaTesto","Prima del matrimonio: testo","ta"],["sposati.dopoTitolo","Dopo il matrimonio: titolo"],["sposati.dopoTesto","Dopo il matrimonio: testo","ta"]],
+  l:[["sposati.frasi","Risposte al pulsante \"Controlla di nuovo\"",[["testo","Frase","ta"]]]]},
+ {t:"Area riservata (testi visibili a tutti)",f:[["privata.titolo","Titolo"],["privata.lead","Testo sopra la password","ta"],["privata.vuota","Testo quando non c'è ancora niente","ta"]]}
+];
+function getP(path){return path.split(".").reduce(function(o,k){return o==null?o:o[k];},C);}
+function setP(path,v){var ks=path.split("."),o=C;for(var i=0;i<ks.length-1;i++)o=o[ks[i]];o[ks[ks.length-1]]=v;}
+var rT;function changed(){clearTimeout(rT);rT=setTimeout(render,250);}
+var uid=0;
+function field(path,label,type){
+  var id="ed"+(++uid),v=getP(path);
+  if(type==="chk"){var c=h("input",{type:"checkbox",id:id});c.checked=!!v;c.addEventListener("change",function(){setP(path,c.checked);changed();});return h("label",{for:id},[c," "+label]);}
+  if(type==="img"){
+    var box=h("div"),draw=function(){box.textContent="";var cur=safeImg(getP(path));
+      if(cur)box.appendChild(h("img",{class:"thumb",src:cur,alt:""}));
+      var fi=h("input",{type:"file",id:id,accept:"image/*"});
+      fi.addEventListener("change",function(){if(fi.files&&fi.files[0])shrink(fi.files[0],function(url){setP(path,url);draw();changed();});});
+      box.appendChild(fi);
+      if(cur)box.appendChild(h("button",{type:"button",class:"ed-b del",text:"Togli la foto",onclick:function(){setP(path,"");draw();changed();}}));};
+    draw();return h("div",null,[h("label",{for:id,text:label}),box]);
   }
-  if(e.target.id==="copyCsv")copy(csv(),"Elenco copiato: incollatelo in Excel o Fogli Google.");
-  if(e.target.id==="copyTxt")copy(state.guests.filter(function(g){return g.sure!=="forse";}).map(function(g){return g.name+(g.phone?" – "+g.phone:"");}).join("\n"),"Nomi e telefoni copiati.");
-});
-document.addEventListener("input",function(e){if(e.target.id==="q"){state.q=e.target.value;render();}});
-document.addEventListener("change",function(e){
-  var t=e.target;
-  if(t.dataset&&t.dataset.status){
-    if(state.readonly){toast("Non hai il permesso di modificare.");render();return;}
-    patchGuest(t.dataset.status,{status:t.value}).catch(failed);
-  }
-  if(t.id==="target"){
-    var v=num(t.value);if(v>999)v=999;
-    state.target=v;state.targetAt=Date.now();commit();
-  }
-});
-$("addBtn").addEventListener("click",function(){openForm(null);});
-$("swapBtn").addEventListener("click",function(){var d=$("swap");if(d.showModal)d.showModal();else d.setAttribute("open","");});
-$("swapClose").addEventListener("click",function(){var d=$("swap");if(d.close)d.close();else d.removeAttribute("open");});
-$("expBtn").addEventListener("click",exportCopy);
-$("impFile").addEventListener("change",function(){if(this.files&&this.files[0])importCopy(this.files[0]);this.value="";});
-$("form").addEventListener("submit",function(e){e.preventDefault();submit(false);});
-$("saveMoreBtn").addEventListener("click",function(){submit(true);});
-$("cancelBtn").addEventListener("click",closeForm);
-$("delBtn").addEventListener("click",function(){
-  if(!state.delArmed){state.delArmed=true;this.textContent="Tocca ancora per eliminare";return;}
-  if(state.readonly){toast("Non hai il permesso di modificare.");return;}
-  var id=state.editing;delGuest(id).then(function(){toast("Eliminato");closeForm();},failed);
-});
-window.addEventListener("hashchange",route);
-var drag=null,justDragged=false;
-document.addEventListener("pointerdown",function(e){
-  var el=e.target.closest&&e.target.closest(".tbl");if(!el)return;
-  drag={el:el,id:el.dataset.tbl,sx:e.clientX,sy:e.clientY,room:el.parentNode.getBoundingClientRect(),moved:false};
-  try{el.setPointerCapture(e.pointerId);}catch(_){}
-});
-document.addEventListener("pointermove",function(e){
-  if(!drag)return;var dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
-  if(!drag.moved&&dx*dx+dy*dy<64)return;drag.moved=true;
-  drag.x=Math.max(6,Math.min(94,(e.clientX-drag.room.left)/drag.room.width*100));
-  drag.y=Math.max(6,Math.min(94,(e.clientY-drag.room.top)/drag.room.height*100));
-  drag.el.style.left=drag.x+"%";drag.el.style.top=drag.y+"%";
-});
-function endDrag(){
-  if(!drag)return;var d=drag;drag=null;
-  if(d.moved){justDragged=true;setTimeout(function(){justDragged=false;},350);patchTable(d.id,{x:Math.round(d.x*10)/10,y:Math.round(d.y*10)/10});}
+  var inp=type==="ta"?h("textarea",{id:id}):h("input",{type:"text",id:id});inp.value=v==null?"":v;
+  inp.addEventListener("input",function(){setP(path,inp.value);changed();});
+  return h("div",null,[h("label",{for:id,text:label}),inp]);
 }
-document.addEventListener("pointerup",endDrag);document.addEventListener("pointercancel",endDrag);
-document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-tbl],[data-newt],[data-tseat],[data-unseat],[data-tdel],[data-tclose]");if(!t)return;
-  if(t.dataset.tbl){if(justDragged)return;state.tEdit=t.dataset.tbl;state.tDelArmed=false;renderTableDlg();return;}
-  if(t.dataset.newt){addTable(t.dataset.newt);return;}
-  var cur=state.tables.filter(function(x){return x.id===state.tEdit;})[0];
-  if(t.dataset.tclose){state.tEdit=null;var d=$("tdlg");if(d.close)d.close();else d.removeAttribute("open");return;}
-  if(!cur)return;
-  if(t.dataset.tseat){state.tDelArmed=false;patchTable(cur.id,{seats:Math.max(1,Math.min(30,cur.seats+Number(t.dataset.tseat)))});return;}
-  if(t.dataset.unseat){state.tDelArmed=false;patchGuest(t.dataset.unseat,{table:""});return;}
-  if(t.dataset.tdel){
-    if(!state.tDelArmed){state.tDelArmed=true;renderTableDlg();return;}
-    state.tDelArmed=false;var name=cur.name;patchTable(cur.id,{deleted:true});toast(name+" eliminato");
-  }
+function shrink(file,cb){
+  var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){
+    var m=1100,k=Math.min(1,m/Math.max(im.width,im.height)),cv=document.createElement("canvas");
+    cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+    cb(cv.toDataURL("image/jpeg",0.74));};im.onerror=function(){toast("Non riesco a leggere questa immagine.");};im.src=r.result;};
+  r.readAsDataURL(file);
+}
+function listBlock(path,title,fields){
+  var box=h("div"),draw=function(){box.textContent="";var arr=getP(path);
+    box.appendChild(h("label",{text:title}));
+    arr.forEach(function(it,i){
+      var fs=h("fieldset",null,[h("legend",{text:"n. "+(i+1)})]);
+      fields.forEach(function(f){fs.appendChild(field(path+"."+i+"."+f[0],f[1],f[2]));});
+      var move=function(d){var j=i+d;if(j<0||j>=arr.length)return;var t=arr[i];arr[i]=arr[j];arr[j]=t;draw();changed();};
+      fs.appendChild(h("div",{class:"ed-row",style:"margin-top:8px"},[
+        h("button",{type:"button",class:"ed-b",text:"↑ Su",onclick:function(){move(-1);}}),
+        h("button",{type:"button",class:"ed-b",text:"↓ Giù",onclick:function(){move(1);}}),
+        h("button",{type:"button",class:"ed-b del",text:"Elimina",onclick:function(){arr.splice(i,1);draw();changed();}})]));
+      box.appendChild(fs);});
+    box.appendChild(h("button",{type:"button",class:"ed-b",text:"+ Aggiungi",onclick:function(){var o={};fields.forEach(function(f){o[f[0]]="";});if(path==="ospiti.modi")o.icona="auto";arr.push(o);draw();changed();}}));};
+  draw();return box;
+}
+function privateBlock(){
+  var st=h("p",{class:"help"}),pw=h("input",{type:"text",id:"edpw",autocomplete:"off"}),ti=h("input",{type:"text",id:"edpt"}),tx=h("textarea",{id:"edpx"}),
+      l1=h("input",{type:"text",id:"edl1"}),u1=h("input",{type:"text",id:"edu1",placeholder:"https://"}),l2=h("input",{type:"text",id:"edl2"}),u2=h("input",{type:"text",id:"edu2",placeholder:"https://"});
+  ti.value="La nostra lista nozze";l1.value="Apri la lista nozze";
+  var show=function(){st.textContent=C.privata.cipher?"Stato: contenuto protetto e salvato. Per cambiarlo, o per cambiare password, compilate di nuovo tutti i campi e premete il pulsante.":"Stato: nessun contenuto riservato. Compilate i campi e premete il pulsante.";};show();
+  var go=h("button",{type:"button",class:"ed-b go",text:"Proteggi con la password",onclick:function(){
+    if(pw.value.length<6){toast("Scegliete una password di almeno 6 caratteri.");return;}
+    var links=[[l1,u1],[l2,u2]].map(function(p){return {etichetta:p[0].value.trim(),url:safeUrl(p[1].value)};}).filter(function(l){return l.url;});
+    if(!links.length&&!tx.value.trim()){toast("Inserite almeno un link (che inizi con https://) o un testo.");return;}
+    if(!(window.crypto&&crypto.subtle)){toast("Questo browser non permette la cifratura: provate con Chrome.");return;}
+    encrypt(pw.value,{titolo:ti.value.trim(),testo:tx.value.trim(),links:links}).then(function(box){C.privata.cipher=box;state.unlocked=null;show();changed();toast("Area riservata protetta. Ricordatevi di scaricare il sito aggiornato.");},function(){toast("Cifratura non riuscita.");});}});
+  var del=h("button",{type:"button",class:"ed-b del",text:"Svuota l'area riservata",onclick:function(){C.privata.cipher=null;state.unlocked=null;show();changed();}});
+  return h("details",null,[h("summary",{text:"Area riservata: password e lista nozze"}),
+    h("p",{class:"help",text:"Quello che scrivete qui viene cifrato con la password: nel codice del sito non resta leggibile. La password non viene salvata da nessuna parte, quindi annotatela."}),st,
+    h("label",{for:"edpw",text:"Password da dare agli invitati"}),pw,h("label",{for:"edpt",text:"Titolo"}),ti,h("label",{for:"edpx",text:"Messaggio"}),tx,
+    h("label",{for:"edl1",text:"Primo link: testo del pulsante"}),l1,h("label",{for:"edu1",text:"Primo link: indirizzo"}),u1,
+    h("label",{for:"edl2",text:"Secondo link (facoltativo): testo del pulsante"}),l2,h("label",{for:"edu2",text:"Secondo link: indirizzo"}),u2,
+    h("div",{class:"ed-row",style:"margin:10px 0 12px"},[go,del])]);
+}
+function buildEditor(){
+  var body=$("edBody");body.textContent="";
+  body.appendChild(h("p",{class:"help",text:"Le modifiche si vedono subito nella pagina dietro. Quando avete finito premete \"Scarica il sito aggiornato\": ottenete un nuovo index.html da caricare al posto del vecchio. Finché non lo scaricate, niente viene salvato."}));
+  FORM.forEach(function(g){
+    var d=h("details",null,[h("summary",{text:g.t})]);
+    (g.f||[]).forEach(function(f){d.appendChild(field(f[0],f[1],f[2]));});
+    (g.l||[]).forEach(function(l){d.appendChild(listBlock(l[0],l[1],l[2]));});
+    d.appendChild(h("div",{style:"height:12px"}));body.appendChild(d);});
+  body.appendChild(privateBlock());
+}
+function openEditor(){buildEditor();var d=$("ed");if(!d.open){if(d.showModal)d.showModal();else d.setAttribute("open","");}}
+function exportHtml(){
+  var doc=document.documentElement.cloneNode(true);
+  doc.querySelector("#app").textContent="";doc.querySelector("#edBody").textContent="";doc.querySelector("#toast").textContent="";doc.querySelector("#toast").className="toast";
+  doc.querySelector("#ed").removeAttribute("open");
+  doc.querySelector("#content").textContent="\n"+JSON.stringify(C,null,1).replace(/</g,"\\u003c")+"\n";
+  doc.querySelector("title").textContent=C.sposi.join(" e ")+" sposi";
+  return "<!DOCTYPE html>\n"+doc.outerHTML;
+}
+$("edClose").addEventListener("click",function(){var d=$("ed");if(d.close)d.close();else d.removeAttribute("open");});
+$("edCopy").addEventListener("click",function(){copyText(exportHtml(),"Codice copiato: incollatelo in Google Sites.");});
+$("edDown").addEventListener("click",function(){
+  var html=exportHtml(),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download="index.html";document.body.appendChild(a);a.click();a.remove();
+  toast("Scaricato index.html ("+Math.round(html.length/1024)+" KB).");
 });
-document.addEventListener("change",function(e){
-  var t=e.target;if(!state.tEdit)return;
-  if(t.id==="t-name")patchTable(state.tEdit,{name:t.value.trim()||"Tavolo"});
-  else if(t.name==="tshape")patchTable(state.tEdit,{shape:t.value});
-  else if(t.id==="t-addg"&&t.value)patchGuest(t.value,{table:state.tEdit});
-});
-$("tdlg").addEventListener("close",function(){state.tEdit=null;});
-$("f-cat").innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.t)+'</option>';}).join("");
-
-/* ---------- avvio ---------- */
-try{var saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved)merge(saved);}catch(e){}
-merge(SEED);
-refresh();route();
 })();
 </script>
 </body>
